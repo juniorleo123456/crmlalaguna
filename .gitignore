@@ -1,6 +1,56 @@
-# Ignorar configs sensibles
-config/config.php  # Si tiene pass real, pero por ahora vacío
+# =============================================
+# Ignorar archivos de configuración sensibles
+# =============================================
+config/config.php          # contiene credenciales de BD (aunque ahora vacías, mejor prevenir)
+.env                       # si usamos .env en el futuro
 
-# Ignorar temporales
+# =============================================
+# Archivos y carpetas temporales / cachés
+# =============================================
 *.log
-/vendor/  # Si usamos Composer después
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store                  # Mac
+Thumbs.db                  # Windows
+ehthumbs.db
+desktop.ini
+
+# =============================================
+# Carpetas de desarrollo y editores
+# =============================================
+.vscode/                   # Configuraciones personales de VS Code
+.idea/                     # Si usas PhpStorm
+*.sublime-project
+*.sublime-workspace
+
+# =============================================
+# XAMPP / PHP / Servidor local
+# =============================================
+xampp/                     # si tienes algo dentro del proyecto
+php_errors.log
+error_log
+access_log
+
+# =============================================
+# Dependencias que instalaremos después
+# =============================================
+vendor/                    # Composer (autoload)
+node_modules/              # si agregamos npm para JS avanzado
+public/assets/vendor/      # si descargamos librerías manualmente
+
+# =============================================
+# Archivos generados o de build
+# =============================================
+*.min.js
+*.min.css
+build/
+dist/
+
+# =============================================
+# No ignorar lo importante (comentario)
+# =============================================
+!public/assets/css/        # Bootstrap y estilos custom sí los versionamos
+!public/assets/js/
+!public/assets/img/
