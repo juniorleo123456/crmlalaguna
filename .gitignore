@@ -1,0 +1,6 @@
+# Ignorar configs sensibles
+config/config.php  # Si tiene pass real, pero por ahora vacío
+
+# Ignorar temporales
+*.log
+/vendor/  # Si usamos Composer después
