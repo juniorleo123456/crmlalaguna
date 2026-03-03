@@ -563,6 +563,13 @@ ALTER TABLE `projects`
   ADD KEY `idx_projects_client` (`client_id`),
   ADD KEY `fk_projects_company` (`company_id`);
 
+  ALTER TABLE projects ADD PRIMARY KEY (id);
+  ALTER TABLE projects MODIFY id INT AUTO_INCREMENT;
+  ALTER TABLE projects ADD INDEX idx_client_id (client_id);
+  ALTER TABLE projects ADD INDEX idx_status (status);
+  ALTER TABLE projects ADD INDEX idx_created_by (created_by);
+  ALTER TABLE projects ADD COLUMN is_active TINYINT(1) DEFAULT 1 AFTER progress;
+
 --
 -- Indices de la tabla `rate_limits`
 --
@@ -645,12 +652,13 @@ ALTER TABLE `contracts`
 --
 ALTER TABLE `lots`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
 --
 -- AUTO_INCREMENT de la tabla `lot_payments`
 --
 ALTER TABLE `lot_payments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+  
 
 --
 -- AUTO_INCREMENT de la tabla `lot_reservations`

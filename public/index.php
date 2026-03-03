@@ -1,72 +1,157 @@
 <?php
 // public/index.php - Punto de entrada único
 
+// Iniciar sesión siempre al principio
 session_start();
-require_once __DIR__ . '/../config/config.php';
+
+// Autoloader simple para clases en app/ (controllers, core, models, etc.)
+spl_autoload_register(function ($className) {
+    // Convertimos namespace o nombre de clase a ruta de archivo
+    $className = str_replace('\\', '/', $className); // por si usamos namespaces en el futuro
+
+    // Posibles carpetas donde buscar clases
+    $possiblePaths = [
+        __DIR__ . '/../app/controllers/' . $className . '.php',
+        __DIR__ . '/../app/core/'       . $className . '.php',
+        __DIR__ . '/../app/models/'     . $className . '.php',
+        // Puedes agregar más carpetas cuando las crees
+    ];
+
+    // Buscar en cada ruta posible
+    foreach ($possiblePaths as $path) {
+        if (file_exists($path)) {
+            require_once $path;
+            return; // clase encontrada, salimos
+        }
+    }
+
+    // Si no se encontró (opcional: puedes lanzar excepción o dejar que PHP falle)
+    // error_log("Autoloader: Clase no encontrada: $className");
+});
+
+// Cargar configuración
+require_once __DIR__ . '/../app/core/Database.php';
+
+// Definir BASE_URL de forma segura
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
+$host     = $_SERVER['HTTP_HOST'];
+$script   = $_SERVER['SCRIPT_NAME'];                    // /public/index.php o /index.php
+$basePath = rtrim(dirname($script), '/\\');             // quita /index.php y maneja Windows
+
+define('BASE_URL', $protocol . $host . $basePath . '/');
 
 // =============================================
-// 1. Obtener información de la petición
+// 1. Obtener la ruta solicitada (limpia)
 // =============================================
-$requestUri   = parse_url($_SERVER['REQUEST_URI'],   PHP_URL_PATH);
-$scriptName   = $_SERVER['SCRIPT_NAME'];               // ej: /crmlalaguna1.0/public/index.php
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$scriptName = $_SERVER['SCRIPT_NAME']; // ej: /crmlalaguna1.0/public/index.php
 
-// =============================================
-// 2. Calcular el prefijo base de forma dinámica
-// =============================================
-$basePath = dirname($scriptName);  // quita /index.php → /crmlalaguna1.0/public
+// Calcular el prefijo base del proyecto (dinámico)
+$basePath = rtrim(dirname($scriptName), '/');
 
-// Normalizar (quitar slash final si existe)
-$basePath = rtrim($basePath, '/');
-
-// =============================================
-// 3. Extraer la ruta real solicitada (quitando el basePath)
-// =============================================
+// Quitar el prefijo base de la URI para obtener la ruta real
 $route = $requestUri;
-
-// Si la ruta empieza exactamente con el basePath, quitamos ese prefijo
 if (str_starts_with($route, $basePath)) {
     $route = substr($route, strlen($basePath));
 }
-
-// Limpiar slashes iniciales y finales
 $route = trim($route, '/');
 
-// Si quedó vacío → es la página principal
+// Ruta por defecto
 if ($route === '') {
     $route = 'home';
 }
 
 // =============================================
-// Router
+// 2. Definir rutas (GET y POST por separado)
 // =============================================
 $routes = [
-    'home'       => ['controller' => 'HomeController', 'action' => 'index'],
-    'login'      => ['controller' => 'AuthController', 'action' => 'showLogin'],
-    'dashboard'  => ['controller' => 'DashboardController', 'action' => 'index'],
-    'lots/list'  => ['controller' => 'LotsController', 'action' => 'list'],  // ejemplo con sub-ruta
+    'GET' => [
+        ''           => ['controller' => 'HomeController', 'action' => 'index'], // ← también vale la raíz vacía
+        'home'       => ['controller' => 'HomeController', 'action' => 'index'],
+        'login'      => ['controller' => 'AuthController', 'action' => 'showLogin'],
+        'logout'     => ['controller' => 'AuthController', 'action' => 'logout'],
+        'dashboard'  => ['controller' => 'DashboardController', 'action' => 'index'],
+        'clients'          => ['controller' => 'ClientsController', 'action' => 'index'],
+        'clients/create'   => ['controller' => 'ClientsController', 'action' => 'create'],
+        'clients/edit/(\d+)' => ['controller' => 'ClientsController', 'action' => 'edit'],
+        'clients/toggle/(\d+)' => ['controller' => 'ClientsController', 'action' => 'toggleStatus'],
+        'projects'               => ['controller' => 'ProjectsController', 'action' => 'index'],
+        'projects/create'        => ['controller' => 'ProjectsController', 'action' => 'create'],
+        'projects/edit/(\d+)'    => ['controller' => 'ProjectsController', 'action' => 'edit'],
+        'projects/change-status/(\d+)' => ['controller' => 'ProjectsController', 'action' => 'changeStatus'],
+        'blocks'                 => ['controller' => 'BlocksController', 'action' => 'index'],
+        'blocks/create'          => ['controller' => 'BlocksController', 'action' => 'create'],
+        'blocks/edit/(\d+)'      => ['controller' => 'BlocksController', 'action' => 'edit'],
+        'blocks/toggle/(\d+)'    => ['controller' => 'BlocksController', 'action' => 'toggleStatus'],
+        'blocks/change-status/(\d+)' => ['controller' => 'BlocksController', 'action' => 'changeStatus'],
+        'clients/view/(\d+)' => ['controller' => 'ClientsController', 'action' => 'view'],
+        'client-services/create' => ['controller' => 'ClientServicesController', 'action' => 'create'],
+        // 'lots/list'  => ['controller' => 'LotsController', 'action' => 'list'],
+    ],
+
+    'POST' => [
+        'login'      => ['controller' => 'AuthController', 'action' => 'processLogin'],
+        'clients/create'   => ['controller' => 'ClientsController', 'action' => 'create'],
+        'clients/edit/(\d+)' => ['controller' => 'ClientsController', 'action' => 'edit'],
+        'clients/toggle/(\d+)' => ['controller' => 'ClientsController', 'action' => 'toggleStatus'],
+        'projects/create'        => ['controller' => 'ProjectsController', 'action' => 'create'],
+        'projects/edit/(\d+)'    => ['controller' => 'ProjectsController', 'action' => 'edit'],
+        'blocks/create'          => ['controller' => 'BlocksController', 'action' => 'create'],
+        'blocks/edit/(\d+)'      => ['controller' => 'BlocksController', 'action' => 'edit'],
+        'client-services/create' => ['controller' => 'ClientServicesController', 'action' => 'create'],
+        ]
 ];
 
-// Procesar ruta
-if (isset($routes[$route])) {
-    $ctrlName = $routes[$route]['controller'];
-    $action   = $routes[$route]['action'];
+// =============================================
+// 3. Procesar la ruta
+// =============================================
+$method = $_SERVER['REQUEST_METHOD'];
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$route = trim($requestUri, '/');
 
-    $ctrlFile = __DIR__ . '/../app/controllers/' . $ctrlName . '.php';
+$controller = null;
+$action = null;
+$params = [];
+
+foreach ($routes[$method] ?? [] as $pattern => $target) {
+    if (preg_match('#^' . str_replace('(\d+)', '(\d+)', $pattern) . '$#', $route, $matches)) {
+        $controller = $target['controller'];
+        $action = $target['action'];
+        $params = array_slice($matches, 1); // extrae los parámetros (ej: el ID)
+        break;
+    }
+}
+
+if ($controller && $action) {
+    $ctrlFile = __DIR__ . '/../app/controllers/' . $controller . '.php';
 
     if (file_exists($ctrlFile)) {
         require_once $ctrlFile;
-        $controller = new $ctrlName();
-        if (method_exists($controller, $action)) {
-            $controller->$action();
+
+        if (class_exists($controller)) {
+            $obj = new $controller();
+
+            if (method_exists($obj, $action)) {
+                // Llamar acción pasando parámetros si existen (ej: $id)
+                if (!empty($params)) {
+                    $obj->$action(...$params);
+                } else {
+                    $obj->$action();
+                }
+                exit;
+            } else {
+                die("La acción <b>$action</b> no existe en $controller");
+            }
         } else {
-            die("La acción <strong>$action</strong> no existe en $ctrlName");
+            die("No se encontró la clase <b>$controller</b>");
         }
     } else {
-        die("Controlador <strong>$ctrlName</strong> no encontrado");
+        die("No se encontró el archivo del controlador: <b>$ctrlFile</b>");
     }
-} else {
-    http_response_code(404);
-    echo "<h1>404 - Página no encontrada</h1>";
-    echo "<p>La ruta solicitada '<strong>$route</strong>' no está definida.</p>";
-    exit;
 }
+
+// Si llegamos aquí → 404
+http_response_code(404);
+echo "<h1>404 - Página no encontrada</h1>";
+echo "<p>Ruta: <b>" . htmlspecialchars($route) . "</b><br>Método: <b>$method</b></p>";
+exit;

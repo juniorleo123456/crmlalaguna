@@ -1,0 +1,193 @@
+/* Estilos básicos para wireframes (paleta de la empresa) */
+:root {
+  --yellow: #ffcc22; /* acento claro */
+  --teal: #03989e; /* color corporativo */
+  --blue: #3a73c1; /* color principal */
+  --dark: #213644; /* color oscuro */
+  --gray: #494949; /* gris texto */
+  --muted-bg: #efefef; /* fondo tenue */
+}
+body {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans",
+    sans-serif;
+  color: var(--gray);
+}
+#* {
+  box-sizing: border-box;
+}
+html,
+body {
+  overflow-x: hidden;
+}
+#wrapper {
+  min-height: 100vh;
+}
+#sidebar {
+  width: 220px;
+  background: linear-gradient(180deg, var(--muted-bg), #fff);
+}
+#page-content {
+  min-height: 100vh;
+  min-width: 0; /* allow flex child to shrink and avoid horizontal overflow */
+}
+.logo {
+  width: 125px;
+}
+.logo-sm {
+  width: 125px;
+}
+.avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 6px;
+}
+.nav-link {
+  display: block;
+  padding: 0.6rem 1rem;
+  color: var(--dark);
+}
+.nav-link:hover {
+  background: var(--muted-bg);
+  text-decoration: none;
+}
+.nav-link.active {
+  background: var(--blue);
+  color: #fff;
+}
+.card {
+  border-radius: 8px;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+.table {
+  width: 100%;
+}
+code {
+  background: #f1f1f1;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+}
+/* consolidated mobile rules below */
+
+/* Mobile refinements */
+@media (max-width: 768px) {
+  #wrapper {
+    flex-direction: column;
+  }
+  /* Sidebar starts hidden off-canvas and becomes visible when .open is added */
+  #sidebar {
+    width: 200px;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    background: #fff;
+    position: fixed;
+    transform: translateX(-260px);
+    display: block;
+    z-index: 1030;
+  }
+  #sidebar.open {
+    transform: translateX(0);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+  #page-content {
+    width: 100%;
+  }
+  .logo-sm {
+    width: 90px;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  /* Overlay for mobile sidebar */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 1015;
+  }
+  .overlay.show {
+    display: block;
+  }
+}
+
+/* Smooth sidebar transition for modern browsers */
+#sidebar {
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+#sidebar.open {
+  transform: translateX(0);
+}
+
+/* Responsive: convert wide tables into vertical stacked cards on small screens */
+@media (max-width: 768px) {
+  .responsive-vertical thead {
+    display: none;
+  }
+  .responsive-vertical tbody tr {
+    display: block;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+  }
+  .responsive-vertical tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-top: none;
+  }
+  .responsive-vertical tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--gray);
+    margin-right: 0.5rem;
+  }
+  .responsive-vertical tbody td.text-end {
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
+/* Botones y acentos */
+.btn-primary {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.btn-primary:hover {
+  background: #335fa8;
+  border-color: #335fa8;
+}
+.btn-success {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+.badge.bg-info {
+  background: var(--teal);
+}
+
+/* Tarjetas con color de encabezado */
+.card-header-custom {
+  background: var(--yellow);
+  color: var(--dark);
+}
