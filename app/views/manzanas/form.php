@@ -30,6 +30,12 @@
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                            <?php if (empty($projectsList)): ?>
+                                <small class="text-danger d-block mt-1">
+                                    No hay proyectos disponibles.
+                                    <a href="<?= BASE_URL ?>projects/create" class="text-primary">Crea uno primero</a>.
+                                </small>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Nombre de la manzana -->

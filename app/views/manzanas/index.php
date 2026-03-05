@@ -46,6 +46,9 @@
                                 </td>
                                 <td data-label="Total Lotes">
                                     <?= htmlspecialchars($block['total_lots']) ?>
+                                    <?php if ($block['real_lots'] != $block['total_lots']): ?>
+                                    <small class="text-danger d-block">(Real: <?= $block['real_lots'] ?>)</small>
+                                    <?php endif; ?>
                                 </td>
                                 <td data-label="Pago Mensual Mín.">
                                     S/ <?= number_format($block['min_monthly_payment'], 2) ?>

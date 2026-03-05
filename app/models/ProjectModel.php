@@ -203,4 +203,16 @@ class ProjectModel
     {
         return ['planificacion', 'ejecucion', 'entregado', 'cancelado'];
     }
+
+    /**
+ * Verifica si un proyecto existe por su ID
+ * @param int $projectId ID del proyecto
+ * @return bool true si existe, false si no
+ */
+public function projectExists(int $projectId): bool
+{
+    $stmt = $this->pdo->prepare("SELECT id FROM projects WHERE id = ? LIMIT 1");
+    $stmt->execute([$projectId]);
+    return (bool) $stmt->fetch();
+}
 }

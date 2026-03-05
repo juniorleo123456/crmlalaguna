@@ -41,11 +41,23 @@ class BlockModel
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    public function projectExists(int $projectId): bool
+    {
+        $stmt = $this->pdo->prepare("SELECT id FROM projects WHERE id = ?");
+        $stmt->execute([$projectId]);
+        return (bool) $stmt->fetch();
+    }
+
     /**
      * Crea una nueva manzana
      */
     public function create(array $data): int
     {
+
+        if (!$this->projectExists($data['project_id'])) {
+            throw new InvalidArgumentException("El proyecto con ID {$data['project_id']} no existe.");
+        }
+
         $stmt = $this->pdo->prepare("
             INSERT INTO blocks 
             (project_id, name, description, total_lots, min_monthly_payment, initial_payment, status, created_at)
@@ -67,6 +79,11 @@ class BlockModel
      */
     public function update(int $id, array $data): bool
     {
+
+        if (!$this->projectExists($data['project_id'])) {
+            throw new InvalidArgumentException("El proyecto con ID {$data['project_id']} no existe.");
+        }
+
         $stmt = $this->pdo->prepare("
             UPDATE blocks SET
                 project_id = ?,
@@ -87,6 +104,33 @@ class BlockModel
             $data['initial_payment'] ?? 0,
             $id
         ]);
+    }
+
+    /**
+     * Cuenta los lote reales asociados a una manzana
+     */
+    public function countRealLots(int $blockId): int
+    {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM lots WHERE block_id = ?");
+        $stmt->execute([$blockId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Obtiene todas las manzanas activas de un proyecto específico
+     */
+
+    public function getByProject(int $projectId): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT b.*, p.title AS project_title 
+            FROM blocks b
+            LEFT JOIN projects p ON b.project_id = p.id
+            WHERE project_id = ? AND status = 'active'
+            ORDER BY name
+        ");
+        $stmt->execute([$projectId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**

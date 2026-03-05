@@ -86,7 +86,11 @@ $routes = [
         'blocks/change-status/(\d+)' => ['controller' => 'BlocksController', 'action' => 'changeStatus'],
         'clients/view/(\d+)' => ['controller' => 'ClientsController', 'action' => 'view'],
         'client-services/create' => ['controller' => 'ClientServicesController', 'action' => 'create'],
-        // 'lots/list'  => ['controller' => 'LotsController', 'action' => 'list'],
+        'lots' => ['controller' => 'LotsController', 'action' => 'index'],
+        'lots/create' => ['controller' => 'LotsController', 'action' => 'create'],
+        'lots/edit/(\d+)' => ['controller' => 'LotsController', 'action' => 'edit'],
+        'lots/toggle/(\d+)' => ['controller' => 'LotsController', 'action' => 'toggleStatus'],
+        'map' => ['controller' => 'LotsController', 'action' => 'map'],
     ],
 
     'POST' => [
@@ -99,6 +103,12 @@ $routes = [
         'blocks/create'          => ['controller' => 'BlocksController', 'action' => 'create'],
         'blocks/edit/(\d+)'      => ['controller' => 'BlocksController', 'action' => 'edit'],
         'client-services/create' => ['controller' => 'ClientServicesController', 'action' => 'create'],
+        'lots/create' => ['controller' => 'LotsController', 'action' => 'create'],
+        'lots/edit/(\d+)' => ['controller' => 'LotsController', 'action' => 'edit'],
+        'map_left'     => (float) ($_POST['map_left'] ?? 0.00),
+        'map_top'      => (float) ($_POST['map_top'] ?? 0.00),
+        'map_width'    => (float) ($_POST['map_width'] ?? 8.00),
+        'map_height'   => (float) ($_POST['map_height'] ?? 8.00),
         ]
 ];
 

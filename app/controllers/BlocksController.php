@@ -22,6 +22,12 @@ class BlocksController extends Controller
     {
         $blocks = $this->blockModel->getAll();
 
+        // Calcular conteo real de lotes para cada manzana
+         foreach ($blocks as &$block) {
+        $block['real_lots'] = $this->blockModel->countRealLots($block['id']);
+         }
+         unset($block); // buena práctica para evitar referencia accidental
+
         $this->render('manzanas/index', [
             'title'  => 'Listado de Manzanas',
             'blocks' => $blocks
@@ -75,7 +81,7 @@ class BlocksController extends Controller
 
             // Validaciones básicas (lado servidor)
             $errors = [];
-            if ($data['project_id'] <= 0) $errors[] = 'Debes seleccionar un proyecto válido';
+            if ($data['project_id'] <= 0 || !$projectModel->projectExists($data['project_id'])) $errors[] = 'Debes seleccionar un proyecto válido';
             if (empty($data['name'])) $errors[] = 'El nombre de la manzana es obligatorio';
             if ($data['total_lots'] <= 0) $errors[] = 'El total de lotes debe ser mayor a 0';
             if ($data['min_monthly_payment'] <= 0) $errors[] = 'El pago mensual mínimo debe ser mayor a 0';
