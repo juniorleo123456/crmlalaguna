@@ -1,3 +1,4 @@
+-- Active: 1745274980710@@localhost@3306@crmlalaguna_v1
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/

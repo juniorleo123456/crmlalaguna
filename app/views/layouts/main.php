@@ -88,65 +88,89 @@
                     <img src="<?= BASE_URL ?>assets/img/logo-lalaguna.svg" alt="Logo" class="logo mb-2" style="max-width: 140px;">
                     <h5 class="mb-0">CRM La Laguna</h5>
                 </div>
+
                 <div class="list-group list-group-flush">
     <?php
-    $menus = $this->getMenusForCurrentUser();
+    $allMenus = $this->getMenusForCurrentUser();
 
-    // Organizar menús por parent_id
-    $menuTree = [];
-    foreach ($menus as $menu) {
-        if ($menu['parent_id'] === null) {
-            $menuTree[$menu['id']] = $menu + ['children' => []];
-        } else {
-            if (isset($menuTree[$menu['parent_id']])) {
-                $menuTree[$menu['parent_id']]['children'][] = $menu;
+    // 1. Recolectar TODOS los padres activos primero
+    $parents = [];
+    foreach ($allMenus as $menu) {
+        if ($menu['parent_id'] === null && ($menu['is_active'] ?? 1) == 1) {
+            $parents[$menu['id']] = $menu + ['children' => []];
+        }
+    }
+
+    // 2. Asignar TODOS los hijos a sus padres (segunda pasada completa)
+    foreach ($allMenus as $menu) {
+        if ($menu['parent_id'] !== null && ($menu['is_active'] ?? 1) == 1) {
+            $parentId = (int)$menu['parent_id'];
+            if (isset($parents[$parentId])) {
+                $parents[$parentId]['children'][] = $menu;
             }
         }
     }
 
-    // Renderizar menú jerárquico
-    foreach ($menuTree as $parent):
+    // 3. Ordenar padres por 'order'
+    usort($parents, fn($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
+
+    // 4. Renderizar
+    foreach ($parents as $parent):
         $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $parentPath = '/' . trim($parent['url'], '/');
+        $parentPath = '/' . trim($parent['url'] ?? '', '/');
         $isActive = ($currentPath === $parentPath || strpos($currentPath, $parentPath . '/') === 0);
         $hasChildren = !empty($parent['children']);
+
+        // Verificar roles del padre (seguro)
+        $allowedRoles = json_decode($parent['roles'] ?? '[]', true);
+        if (!is_array($allowedRoles)) $allowedRoles = [];
+        if (!in_array($_SESSION['role'] ?? 'guest', $allowedRoles)) continue;
     ?>
-        <!-- Enlace padre: siempre redirige a su URL -->
-        <a href="<?= BASE_URL . trim($parent['url'], '/') ?>" 
-   class="list-group-item list-group-item-action py-3 <?= $isActive ? 'active' : '' ?> parent-menu"
-   <?= $hasChildren ? 'data-bs-toggle="collapse" data-bs-target="#submenu-' . $parent['id'] . '" aria-expanded="' . ($isActive ? 'true' : 'false') . '" aria-controls="submenu-' . $parent['id'] . '"' : '' ?>>
-    <?php if (!empty($parent['icon'])): ?>
-        <i class="<?= htmlspecialchars($parent['icon']) ?> me-2"></i>
-    <?php endif; ?>
-    <?= htmlspecialchars($parent['label']) ?>
-    <?php if ($hasChildren): ?>
-        <i class="bi bi-chevron-down float-end submenu-icon"></i>
-    <?php endif; ?>
-</a>
+        <a href="<?= BASE_URL . trim($parent['url'] ?? '#', '/') ?>" 
+           class="list-group-item list-group-item-action py-3 <?= $isActive ? 'active' : '' ?> parent-menu"
+           <?= $hasChildren ? 'data-bs-toggle="collapse" data-bs-target="#submenu-' . $parent['id'] . '" aria-expanded="' . ($isActive ? 'true' : 'false') . '" aria-controls="submenu-' . $parent['id'] . '"' : '' ?>>
+            <?php if (!empty($parent['icon'])): ?>
+                <i class="<?= htmlspecialchars($parent['icon']) ?> me-2"></i>
+            <?php endif; ?>
+            <?= htmlspecialchars($parent['label'] ?? 'Sin nombre') ?>
+            <?php if ($hasChildren): ?>
+                <i class="bi bi-chevron-down float-end submenu-icon <?= $isActive ? 'bi-chevron-up' : '' ?>"></i>
+            <?php endif; ?>
+        </a>
 
         <?php if ($hasChildren): ?>
             <div class="collapse <?= $isActive ? 'show' : '' ?>" id="submenu-<?= $parent['id'] ?>">
-                <?php foreach ($parent['children'] as $child):
-                    $childPath = '/' . trim($child['url'], '/');
+                <?php
+                // Ordenar hijos por 'order'
+                usort($parent['children'], fn($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
+
+                foreach ($parent['children'] as $child):
+                    $childPath = '/' . trim($child['url'] ?? '#', '/');
                     $childActive = ($currentPath === $childPath || strpos($currentPath, $childPath . '/') === 0);
+
+                    // Verificar roles del hijo
+                    $childRoles = json_decode($child['roles'] ?? '[]', true);
+                    if (!is_array($childRoles)) $childRoles = [];
+                    if (!in_array($_SESSION['role'] ?? 'guest', $childRoles)) continue;
                 ?>
-                    <a href="<?= BASE_URL . trim($child['url'], '/') ?>" 
+                    <a href="<?= BASE_URL . trim($child['url'] ?? '#', '/') ?>" 
                        class="list-group-item list-group-item-action py-2 ps-5 <?= $childActive ? 'active' : '' ?>">
                         <?php if (!empty($child['icon'])): ?>
                             <i class="<?= htmlspecialchars($child['icon']) ?> me-2"></i>
                         <?php endif; ?>
-                        <?= htmlspecialchars($child['label']) ?>
+                        <?= htmlspecialchars($child['label'] ?? 'Sin nombre') ?>
                     </a>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
     <?php endforeach; ?>
 
-    <!-- Salir siempre al final -->
+    <!-- Salir -->
     <a href="<?= BASE_URL ?>logout" class="list-group-item list-group-item-action py-3 text-danger border-top">
         <i class="bi bi-box-arrow-right me-2"></i> Salir
     </a>
 </div>
+
             </div>
         <?php endif; ?>
 

@@ -91,6 +91,12 @@ $routes = [
         'lots/edit/(\d+)' => ['controller' => 'LotsController', 'action' => 'edit'],
         'lots/toggle/(\d+)' => ['controller' => 'LotsController', 'action' => 'toggleStatus'],
         'map' => ['controller' => 'LotsController', 'action' => 'map'],
+        'lot-sales'               => ['controller' => 'LotSalesController', 'action' => 'index'],
+        'lot-sales/create'        => ['controller' => 'LotSalesController', 'action' => 'create'],
+        'lot-sales/edit/(\d+)'    => ['controller' => 'LotSalesController', 'action' => 'edit'],
+        'lot-reservations'               => ['controller' => 'LotReservationsController', 'action' => 'index'],
+        'lot-reservations/create'        => ['controller' => 'LotReservationsController', 'action' => 'create'],
+     // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],  // lo agregamos después
     ],
 
     'POST' => [
@@ -109,6 +115,10 @@ $routes = [
         'map_top'      => (float) ($_POST['map_top'] ?? 0.00),
         'map_width'    => (float) ($_POST['map_width'] ?? 8.00),
         'map_height'   => (float) ($_POST['map_height'] ?? 8.00),
+        'lot-sales/create'        => ['controller' => 'LotSalesController', 'action' => 'create'],
+        'lot-sales/edit/(\d+)'    => ['controller' => 'LotSalesController', 'action' => 'edit'],
+        'lot-reservations/create'        => ['controller' => 'LotReservationsController', 'action' => 'create'],
+     // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],
         ]
 ];
 

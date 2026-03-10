@@ -137,7 +137,7 @@ abstract class Controller
             $pdo = getDBConnection();  // función que ya tienes en config.php
 
             $stmt = $pdo->prepare("
-            SELECT id, parent_id, label, url, icon, `order`
+            SELECT id, parent_id, label, url, icon, `order`, is_active, roles
             FROM menus
             WHERE JSON_CONTAINS(roles, JSON_QUOTE(:role))
               AND is_active = 1
