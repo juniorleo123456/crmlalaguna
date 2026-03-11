@@ -22,6 +22,12 @@ class LotReservationsController extends Controller
 
     public function index()
     {
+
+        $expiredCount = $this->reservationModel->expireOldReservations();
+            if ($expiredCount > 0) {
+                $this->setFlash('warning', "Se han expirado $expiredCount reservas por fecha límite.");
+            }
+
         $reservations = $this->reservationModel->getAll();
 
         $this->render('lot-reservations/index', [

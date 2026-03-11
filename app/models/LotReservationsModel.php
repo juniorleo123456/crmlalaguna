@@ -134,5 +134,35 @@ public function cancel(int $id, string $reason = ''): bool
     }
 }
 
+/**
+ * Expira automáticamente todas las reservas que ya pasaron su fecha límite
+ * @return int Cantidad de reservas expiradas
+ */
+public function expireOldReservations(): int
+{
+    $stmt = $this->pdo->prepare("
+        UPDATE lot_reservations 
+        SET status = 'expirada'
+        WHERE status = 'activa'
+          AND expiration_date < NOW()
+    ");
+    $stmt->execute();
+    $expiredCount = $stmt->rowCount();
+
+    if ($expiredCount > 0) {
+        // Liberar los lotes asociados
+        $this->pdo->exec("
+            UPDATE lots l
+            INNER JOIN lot_reservations lr ON l.id = lr.lot_id
+            SET l.status = 'disponible',
+                l.updated_at = NOW()
+            WHERE lr.status = 'expirada'
+              AND l.status = 'reservado'
+        ");
+    }
+
+    return $expiredCount;
+}
+
     // Update los agregamos en la siguiente iteración
 }
