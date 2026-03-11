@@ -116,4 +116,28 @@ class LotReservationsController extends Controller
             'clients' => $clients
         ]);
     }
+
+    public function cancel(int $id)
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $this->setFlash('danger', 'Acción no permitida.');
+        $this->redirect('lot-reservations');
+    }
+
+    $token = $_POST['csrf_token'] ?? '';
+    if (!$this->validateCsrfToken($token)) {
+        $this->setFlash('danger', 'Error de seguridad.');
+        $this->redirect('lot-reservations');
+    }
+
+    $reason = trim($_POST['reason'] ?? '');
+
+    if ($this->reservationModel->cancel($id, $reason)) {
+        $this->setFlash('success', 'Reserva cancelada correctamente. El lote ha sido liberado.');
+    } else {
+        $this->setFlash('danger', 'Error al cancelar la reserva.');
+    }
+
+    $this->redirect('lot-reservations');
+}
 }

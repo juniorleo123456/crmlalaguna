@@ -164,4 +164,28 @@ class LotSalesController extends Controller
         'clients' => $clients
     ]);
     }
+
+    public function cancel(int $id)
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $this->setFlash('danger', 'Acción no permitida.');
+        $this->redirect('lot-sales');
+    }
+
+    $token = $_POST['csrf_token'] ?? '';
+    if (!$this->validateCsrfToken($token)) {
+        $this->setFlash('danger', 'Error de seguridad.');
+        $this->redirect('lot-sales');
+    }
+
+    $reason = trim($_POST['reason'] ?? '');
+
+    if ($this->saleModel->cancel($id, $reason)) {
+        $this->setFlash('success', 'Venta cancelada correctamente. El lote ha sido liberado.');
+    } else {
+        $this->setFlash('danger', 'Error al cancelar la venta.');
+    }
+
+    $this->redirect('lot-sales');
+}
 }

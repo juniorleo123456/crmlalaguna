@@ -62,11 +62,40 @@
                                             class="btn btn-outline-primary" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a href="<?= BASE_URL ?>lot-reservations/cancel/<?= $res['id'] ?>"
-                                            class="btn btn-sm btn-outline-danger ms-1"
-                                            onclick="return confirm('¿Realmente quieres cancelar esta reserva? El lote volverá a disponible.');">
-                                            <i class="bi bi-x-circle"></i>
-                                        </a>
+                                        <?php if ($res['reservation_status'] === 'activa' || $res['reservation_status'] === 'confirmada'): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-1" 
+                                                data-bs-toggle="modal" data-bs-target="#cancelModal<?= $res['id'] ?>" 
+                                                title="Cancelar reserva">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        <?php endif; ?>
+
+                                        <!-- Modal de confirmación -->
+                                        <div class="modal fade" id="cancelModal<?= $res['id'] ?>" tabindex="-1" aria-labelledby="cancelModalLabel<?= $res['id'] ?>" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="cancelModalLabel<?= $res['id'] ?>">Cancelar Reserva #<?= $res['id'] ?></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form method="post" action="<?= BASE_URL ?>lot-reservations/cancel/<?= $res['id'] ?>">
+                                                        <input type="hidden" name="csrf_token" value="<?= $this->generateCsrfToken() ?>">
+                                                        <div class="modal-body">
+                                                            <p>¿Realmente deseas cancelar esta reserva?</p>
+                                                            <p class="text-danger">El lote volverá a estar disponible inmediatamente.</p>
+                                                        <div class="mb-3">
+                                                            <label for="reason<?= $res['id'] ?>" class="form-label">Motivo de cancelación (opcional)</label>
+                                                            <textarea name="reason" id="reason<?= $res['id'] ?>" class="form-control" rows="3" placeholder="Ej: Cliente desistió, problemas de financiamiento..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                        <button type="submit" class="btn btn-danger">Sí, Cancelar Reserva</button>
+                                                    </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <!-- Más adelante: botón Cancelar -->
                                     </div>
                                 </td>

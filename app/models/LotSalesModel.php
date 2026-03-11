@@ -231,4 +231,74 @@ public function countFiltered(array $filters = []): int
     $stmt->execute($params);
     return (int) $stmt->fetchColumn();
 }
+/**
+ * Cancela una venta y libera el lote
+ * @param int $id ID de la venta
+ * @param string $reason Motivo opcional de cancelación
+ * @return bool
+ */
+public function cancel(int $id, string $reason = ''): bool
+{
+    $this->pdo->beginTransaction();
+
+    try {
+        // 1. Obtener la venta y su lote
+        $stmt = $this->pdo->prepare("
+            SELECT ls.lot_id, ls.payment_status
+            FROM lot_sales ls
+            WHERE ls.id = ?
+        ");
+        $stmt->execute([$id]);
+        $sale = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$sale) {
+            throw new Exception("Venta no encontrada");
+        }
+
+        if ($sale['payment_status'] === 'cancelado') {
+            throw new Exception("La venta ya está cancelada");
+        }
+
+        // 2. Marcar venta como cancelada
+        $stmt = $this->pdo->prepare("
+            UPDATE lot_sales 
+            SET payment_status = 'cancelado',
+                canceled_at = NOW(),
+                canceled_reason = ?,
+                updated_at = NOW()
+            WHERE id = ?
+        ");
+        $stmt->execute([$reason, $id]);
+
+        // 3. Liberar el lote (volver a disponible)
+        $stmt = $this->pdo->prepare("
+            UPDATE lots 
+            SET status = 'disponible',
+                updated_at = NOW()
+            WHERE id = ?
+        ");
+        $stmt->execute([$sale['lot_id']]);
+
+        // 4. Registrar en historial (opcional pero recomendado)
+        $stmt = $this->pdo->prepare("
+            INSERT INTO lot_status_history 
+            (lot_id, old_status, new_status, reason, changed_by, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+        $stmt->execute([
+            $sale['lot_id'],
+            'vendido', // o el estado que tenía
+            'disponible',
+            "Venta cancelada (ID {$id}): {$reason}",
+            $_SESSION['user_id'] ?? null
+        ]);
+
+        $this->pdo->commit();
+        return true;
+    } catch (Exception $e) {
+        $this->pdo->rollBack();
+        error_log("Error al cancelar venta ID {$id}: " . $e->getMessage());
+        return false;
+    }
+}
 }

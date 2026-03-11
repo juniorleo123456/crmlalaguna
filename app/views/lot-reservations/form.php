@@ -75,7 +75,7 @@
                     <?= $mode === 'create' ? 'Crear Reserva' : 'Guardar Cambios' ?>
                 </button>
                 <a href="<?= BASE_URL ?>lot-reservations" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Cancelar
+                    <i class="bi bi-arrow-left me-2"></i>
                 </a>
             </div>
         </form>

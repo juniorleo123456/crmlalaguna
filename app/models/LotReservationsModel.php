@@ -66,5 +66,73 @@ class LotReservationsModel
         return (int) $this->pdo->lastInsertId();
     }
 
-    // Update y cancelar los agregamos en la siguiente iteración
+    /**
+ * Cancela una reserva y libera el lote
+ * @param int $id ID de la reserva
+ * @param string $reason Motivo opcional
+ * @return bool
+ */
+public function cancel(int $id, string $reason = ''): bool
+{
+    $this->pdo->beginTransaction();
+
+    try {
+        // 1. Obtener la reserva y su lote
+        $stmt = $this->pdo->prepare("
+            SELECT lr.lot_id, lr.status
+            FROM lot_reservations lr
+            WHERE lr.id = ?
+        ");
+        $stmt->execute([$id]);
+        $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$reservation) {
+            throw new Exception("Reserva no encontrada");
+        }
+
+        if ($reservation['status'] === 'cancelada') {
+            throw new Exception("La reserva ya está cancelada");
+        }
+
+        // 2. Marcar reserva como cancelada
+        $stmt = $this->pdo->prepare("
+            UPDATE lot_reservations 
+            SET status = 'cancelada',
+                notes = CONCAT(IFNULL(notes, ''), '\nCancelada: ', ?),
+                updated_at = NOW()
+            WHERE id = ?
+        ");
+        $stmt->execute([$reason ?: 'Cancelación manual', $id]);
+
+        // 3. Liberar el lote (volver a disponible si estaba reservado por esta reserva)
+        $stmt = $this->pdo->prepare("
+            UPDATE lots 
+            SET status = 'disponible',
+                updated_at = NOW()
+            WHERE id = ? AND status = 'reservado'
+        ");
+        $stmt->execute([$reservation['lot_id']]);
+
+        // 4. Registrar en historial (opcional pero recomendado)
+        $stmt = $this->pdo->prepare("
+            INSERT INTO lot_status_history 
+            (lot_id, old_status, new_status, reason, changed_by, created_at)
+            VALUES (?, 'reservado', 'disponible', ?, ?, NOW())
+        ");
+        $stmt->execute([
+            $reservation['lot_id'],
+            "Reserva cancelada (ID {$id}): {$reason}",
+            $_SESSION['user_id'] ?? null
+        ]);
+
+        $this->pdo->commit();
+        return true;
+    } catch (Exception $e) {
+        $this->pdo->rollBack();
+        error_log("Error al cancelar reserva ID {$id}: " . $e->getMessage());
+        return false;
+    }
+}
+
+    // Update los agregamos en la siguiente iteración
 }

@@ -117,8 +117,11 @@ $routes = [
         'map_height'   => (float) ($_POST['map_height'] ?? 8.00),
         'lot-sales/create'        => ['controller' => 'LotSalesController', 'action' => 'create'],
         'lot-sales/edit/(\d+)'    => ['controller' => 'LotSalesController', 'action' => 'edit'],
+        'lot-sales/cancel/(\d+)' => ['controller' => 'LotSalesController', 'action' => 'cancel'],
         'lot-reservations/create'        => ['controller' => 'LotReservationsController', 'action' => 'create'],
+        'lot-reservations/cancel/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'cancel'],
      // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],
+        
         ]
 ];
 

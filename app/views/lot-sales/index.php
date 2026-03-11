@@ -38,9 +38,9 @@
 
             <div class="col-md-4">
                 <label class="form-label">Buscar (lote o cliente)</label>
-                <input type="text" name="search" class="form-control" 
-                       value="<?= htmlspecialchars($filters['search'] ?? '') ?>" 
-                       placeholder="Número de lote o nombre...">
+                <input type="text" name="search" class="form-control"
+                    value="<?= htmlspecialchars($filters['search'] ?? '') ?>"
+                    placeholder="Número de lote o nombre...">
             </div>
 
             <div class="col-md-2 d-flex align-items-end">
@@ -81,21 +81,58 @@
                                 <td><?= date('d/m/Y', strtotime($sale['sale_date'])) ?></td>
                                 <td>S/ <?= number_format($sale['total_price'], 2) ?></td>
                                 <td>
-                                    <span class="badge bg-<?= match($sale['payment_status']) {
-                                        'al_dia' => 'success',
-                                        'atrasado' => 'warning',
-                                        'mora' => 'danger',
-                                        'cancelado' => 'secondary',
-                                        default => 'light text-dark'
-                                    } ?>">
+                                    <span class="badge bg-<?= match ($sale['payment_status']) {
+                                                                'al_dia' => 'success',
+                                                                'atrasado' => 'warning',
+                                                                'mora' => 'danger',
+                                                                'cancelado' => 'secondary',
+                                                                default => 'light text-dark'
+                                                            } ?>">
                                         <?= ucfirst($sale['payment_status']) ?>
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <a href="<?= BASE_URL ?>lot-sales/edit/<?= $sale['id'] ?>" 
-                                       class="btn btn-sm btn-outline-primary" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="<?= BASE_URL ?>lot-sales/edit/<?= $sale['id'] ?>"
+                                            class="btn btn-outline-primary" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        <?php if ($sale['payment_status'] !== 'cancelado'): ?>
+                                            <button type="button" class="btn btn-outline-danger"
+                                                data-bs-toggle="modal" data-bs-target="#cancelModal<?= $sale['id'] ?>"
+                                                title="Cancelar venta">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Modal de confirmación (uno por fila) -->
+                                    <div class="modal fade" id="cancelModal<?= $sale['id'] ?>" tabindex="-1" aria-labelledby="cancelModalLabel<?= $sale['id'] ?>" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="cancelModalLabel<?= $sale['id'] ?>">Cancelar Venta #<?= $sale['id'] ?></h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form method="post" action="<?= BASE_URL ?>lot-sales/cancel/<?= $sale['id'] ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= $this->generateCsrfToken() ?>">
+                                                    <div class="modal-body">
+                                                        <p>¿Realmente deseas cancelar esta venta?</p>
+                                                        <p class="text-danger">El lote volverá a estar disponible y la venta quedará anulada.</p>
+                                                        <div class="mb-3">
+                                                            <label for="reason<?= $sale['id'] ?>" class="form-label">Motivo de cancelación (opcional)</label>
+                                                            <textarea name="reason" id="reason<?= $sale['id'] ?>" class="form-control" rows="3" placeholder="Ej: Cliente desistió, problemas de financiamiento..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                        <button type="submit" class="btn btn-danger">Sí, Cancelar Venta</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -110,8 +147,8 @@
         <nav aria-label="Paginación de ventas" class="mt-4">
             <ul class="pagination justify-content-center">
                 <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=<?= max(1, $page - 1) ?>&client_id=<?= $filters['client_id'] ?>&payment_status=<?= urlencode($filters['payment_status']) ?>&search=<?= urlencode($filters['search']) ?>" 
-                       <?= $page <= 1 ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Anterior</a>
+                    <a class="page-link" href="?page=<?= max(1, $page - 1) ?>&client_id=<?= $filters['client_id'] ?>&payment_status=<?= urlencode($filters['payment_status']) ?>&search=<?= urlencode($filters['search']) ?>"
+                        <?= $page <= 1 ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Anterior</a>
                 </li>
 
                 <?php for ($p = 1; $p <= $totalPages; $p++): ?>
@@ -123,8 +160,8 @@
                 <?php endfor; ?>
 
                 <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=<?= min($totalPages, $page + 1) ?>&client_id=<?= $filters['client_id'] ?>&payment_status=<?= urlencode($filters['payment_status']) ?>&search=<?= urlencode($filters['search']) ?>" 
-                       <?= $page >= $totalPages ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Siguiente</a>
+                    <a class="page-link" href="?page=<?= min($totalPages, $page + 1) ?>&client_id=<?= $filters['client_id'] ?>&payment_status=<?= urlencode($filters['payment_status']) ?>&search=<?= urlencode($filters['search']) ?>"
+                        <?= $page >= $totalPages ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Siguiente</a>
                 </li>
             </ul>
         </nav>
