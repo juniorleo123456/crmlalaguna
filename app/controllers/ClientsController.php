@@ -1,7 +1,7 @@
 <?php
 // app/controllers/ClientsController.php
 
-class ClientsController extends Controller
+class ClientsController extends Controller 
 {
     private ClientModel $clientModel;
 
@@ -201,4 +201,4 @@ public function view(int $id)
         'services' => $services
     ]);
 }
-}
+} 

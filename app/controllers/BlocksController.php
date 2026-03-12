@@ -145,3 +145,4 @@ class BlocksController extends Controller
         $this->redirect('blocks');
     }
 }
+ 

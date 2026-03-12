@@ -146,4 +146,27 @@ class LotReservationsController extends Controller
 
     $this->redirect('lot-reservations');
 }
+
+public function confirmSale(int $id)
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $this->setFlash('danger', 'Acción no permitida.');
+        $this->redirect('lot-reservations');
+    }
+
+    $token = $_POST['csrf_token'] ?? '';
+    if (!$this->validateCsrfToken($token)) {
+        $this->setFlash('danger', 'Error de seguridad.');
+        $this->redirect('lot-reservations');
+    }
+
+    try {
+        $saleId = $this->reservationModel->confirmSale($id);
+        $this->setFlash('success', "Reserva convertida en venta exitosamente (Venta #{$saleId}). Lote marcado como vendido.");
+    } catch (Exception $e) {
+        $this->setFlash('danger', 'Error al confirmar la venta: ' . $e->getMessage());
+    }
+
+    $this->redirect('lot-reservations');
+}
 }

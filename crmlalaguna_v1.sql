@@ -772,7 +772,7 @@ ALTER TABLE `contracts`
   ADD CONSTRAINT `fk_contracts_cs` FOREIGN KEY (`client_service_id`) REFERENCES `client_services` (`id`) ON DELETE SET NULL;
 
 --
--- Filtros para la tabla `lots`
+-- Filtros para la tabla `lots` 
 --
 ALTER TABLE `lots`
   ADD CONSTRAINT `fk_lots_block` FOREIGN KEY (`block_id`) REFERENCES `blocks` (`id`) ON DELETE CASCADE;

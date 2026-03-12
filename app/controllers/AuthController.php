@@ -95,7 +95,7 @@ class AuthController extends Controller
     $this->setFlash('success', '¡Bienvenido, ' . htmlspecialchars($user['name']) . '!');
     $this->redirect('dashboard');
 }
-    public function logout()
+    public function logout() 
     {
         session_destroy();
         header('Location: /login');

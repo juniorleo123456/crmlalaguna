@@ -67,91 +67,91 @@ class LotReservationsModel
     }
 
     /**
- * Cancela una reserva y libera el lote
- * @param int $id ID de la reserva
- * @param string $reason Motivo opcional
- * @return bool
- */
-public function cancel(int $id, string $reason = ''): bool
-{
-    $this->pdo->beginTransaction();
+     * Cancela una reserva y libera el lote
+     * @param int $id ID de la reserva
+     * @param string $reason Motivo opcional
+     * @return bool
+     */
+    public function cancel(int $id, string $reason = ''): bool
+    {
+        $this->pdo->beginTransaction();
 
-    try {
-        // 1. Obtener la reserva y su lote
-        $stmt = $this->pdo->prepare("
+        try {
+            // 1. Obtener la reserva y su lote
+            $stmt = $this->pdo->prepare("
             SELECT lr.lot_id, lr.status
             FROM lot_reservations lr
             WHERE lr.id = ?
         ");
-        $stmt->execute([$id]);
-        $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute([$id]);
+            $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$reservation) {
-            throw new Exception("Reserva no encontrada");
-        }
+            if (!$reservation) {
+                throw new Exception("Reserva no encontrada");
+            }
 
-        if ($reservation['status'] === 'cancelada') {
-            throw new Exception("La reserva ya está cancelada");
-        }
+            if ($reservation['status'] === 'cancelada') {
+                throw new Exception("La reserva ya está cancelada");
+            }
 
-        // 2. Marcar reserva como cancelada
-        $stmt = $this->pdo->prepare("
+            // 2. Marcar reserva como cancelada
+            $stmt = $this->pdo->prepare("
             UPDATE lot_reservations 
             SET status = 'cancelada',
                 notes = CONCAT(IFNULL(notes, ''), '\nCancelada: ', ?),
                 updated_at = NOW()
             WHERE id = ?
         ");
-        $stmt->execute([$reason ?: 'Cancelación manual', $id]);
+            $stmt->execute([$reason ?: 'Cancelación manual', $id]);
 
-        // 3. Liberar el lote (volver a disponible si estaba reservado por esta reserva)
-        $stmt = $this->pdo->prepare("
+            // 3. Liberar el lote (volver a disponible si estaba reservado por esta reserva)
+            $stmt = $this->pdo->prepare("
             UPDATE lots 
             SET status = 'disponible',
                 updated_at = NOW()
             WHERE id = ? AND status = 'reservado'
         ");
-        $stmt->execute([$reservation['lot_id']]);
+            $stmt->execute([$reservation['lot_id']]);
 
-        // 4. Registrar en historial (opcional pero recomendado)
-        $stmt = $this->pdo->prepare("
+            // 4. Registrar en historial (opcional pero recomendado)
+            $stmt = $this->pdo->prepare("
             INSERT INTO lot_status_history 
             (lot_id, old_status, new_status, reason, changed_by, created_at)
             VALUES (?, 'reservado', 'disponible', ?, ?, NOW())
         ");
-        $stmt->execute([
-            $reservation['lot_id'],
-            "Reserva cancelada (ID {$id}): {$reason}",
-            $_SESSION['user_id'] ?? null
-        ]);
+            $stmt->execute([
+                $reservation['lot_id'],
+                "Reserva cancelada (ID {$id}): {$reason}",
+                $_SESSION['user_id'] ?? null
+            ]);
 
-        $this->pdo->commit();
-        return true;
-    } catch (Exception $e) {
-        $this->pdo->rollBack();
-        error_log("Error al cancelar reserva ID {$id}: " . $e->getMessage());
-        return false;
+            $this->pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Error al cancelar reserva ID {$id}: " . $e->getMessage());
+            return false;
+        }
     }
-}
 
-/**
- * Expira automáticamente todas las reservas que ya pasaron su fecha límite
- * @return int Cantidad de reservas expiradas
- */
-public function expireOldReservations(): int
-{
-    $stmt = $this->pdo->prepare("
+    /**
+     * Expira automáticamente todas las reservas que ya pasaron su fecha límite
+     * @return int Cantidad de reservas expiradas
+     */
+    public function expireOldReservations(): int
+    {
+        $stmt = $this->pdo->prepare("
         UPDATE lot_reservations 
         SET status = 'expirada'
         WHERE status = 'activa'
           AND expiration_date < NOW()
     ");
-    $stmt->execute();
-    $expiredCount = $stmt->rowCount();
+        $stmt->execute();
+        $expiredCount = $stmt->rowCount();
 
-    if ($expiredCount > 0) {
-        // Liberar los lotes asociados
-        $this->pdo->exec("
+        if ($expiredCount > 0) {
+            // Liberar los lotes asociados
+            $this->pdo->exec("
             UPDATE lots l
             INNER JOIN lot_reservations lr ON l.id = lr.lot_id
             SET l.status = 'disponible',
@@ -159,10 +159,94 @@ public function expireOldReservations(): int
             WHERE lr.status = 'expirada'
               AND l.status = 'reservado'
         ");
+        }
+
+        return $expiredCount;
     }
 
-    return $expiredCount;
-}
+    /**
+     * Convierte una reserva confirmada en venta definitiva
+     * @param int $id ID de la reserva
+     * @return int ID de la nueva venta creada
+     * @throws Exception si no se puede convertir
+     */
+    public function confirmSale(int $id): int
+    {
+        $this->pdo->beginTransaction();
+
+        try {
+            // 1. Obtener la reserva
+            $stmt = $this->pdo->prepare("
+            SELECT lr.*, l.price AS lot_price
+            FROM lot_reservations lr
+            LEFT JOIN lots l ON lr.lot_id = l.id
+            WHERE lr.id = ? AND lr.status IN ('activa', 'confirmada')
+        ");
+            $stmt->execute([$id]);
+            $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$reservation) {
+                throw new Exception("Reserva no encontrada o no convertible");
+            }
+
+            // 2. Crear registro en lot_sales
+            $stmt = $this->pdo->prepare("
+            INSERT INTO lot_sales 
+            (lot_id, client_id, sale_date, total_price, initial_payment, balance,
+             payment_term, interest_rate, monthly_fixed_payment, monthly_min_payment,
+             discount_percent, payment_status, notes, created_by, created_at)
+            VALUES (?, ?, NOW(), ?, ?, ?, 0, 0.00, 0.00, 0.00, 0.00, 'al_dia', ?, ?, NOW())
+        ");
+            $stmt->execute([
+                $reservation['lot_id'],
+                $reservation['client_id'],
+                $reservation['lot_price'],           // precio del lote
+                $reservation['amount'],              // inicial = monto de reserva
+                $reservation['lot_price'] - $reservation['amount'], // saldo
+                "Convertida desde reserva ID {$id}",
+                $_SESSION['user_id'] ?? null
+            ]);
+            $saleId = $this->pdo->lastInsertId();
+
+            // 3. Actualizar reserva como confirmada
+            $stmt = $this->pdo->prepare("
+            UPDATE lot_reservations 
+            SET status = 'confirmada',
+                applied_to_sale = 1,
+                updated_at = NOW()
+            WHERE id = ?
+        ");
+            $stmt->execute([$id]);
+
+            // 4. Cambiar estado del lote a 'vendido'
+            $stmt = $this->pdo->prepare("
+            UPDATE lots 
+            SET status = 'vendido',
+                updated_at = NOW()
+            WHERE id = ?
+        ");
+            $stmt->execute([$reservation['lot_id']]);
+
+            // 5. Registrar en historial
+            $stmt = $this->pdo->prepare("
+            INSERT INTO lot_status_history 
+            (lot_id, old_status, new_status, reason, changed_by, created_at)
+            VALUES (?, 'reservado', 'vendido', ?, ?, NOW())
+        ");
+            $stmt->execute([
+                $reservation['lot_id'],
+                "Reserva confirmada como venta (ID {$saleId})",
+                $_SESSION['user_id'] ?? null
+            ]);
+
+            $this->pdo->commit();
+            return $saleId;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Error al confirmar venta desde reserva ID {$id}: " . $e->getMessage());
+            throw $e;
+        }
+    }
 
     // Update los agregamos en la siguiente iteración
 }

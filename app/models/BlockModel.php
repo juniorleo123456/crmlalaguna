@@ -143,6 +143,6 @@ class BlockModel
         }
 
         $stmt = $this->pdo->prepare("UPDATE blocks SET status = ? WHERE id = ?");
-        return $stmt->execute([$newStatus, $id]);
+        return $stmt->execute([$newStatus, $id]); 
     }
 }

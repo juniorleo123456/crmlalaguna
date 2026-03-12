@@ -96,6 +96,9 @@ $routes = [
         'lot-sales/edit/(\d+)'    => ['controller' => 'LotSalesController', 'action' => 'edit'],
         'lot-reservations'               => ['controller' => 'LotReservationsController', 'action' => 'index'],
         'lot-reservations/create'        => ['controller' => 'LotReservationsController', 'action' => 'create'],
+        'lot-payments'               => ['controller' => 'LotPaymentsController', 'action' => 'index'],
+        'lot-payments/create'        => ['controller' => 'LotPaymentsController', 'action' => 'create'],
+        'lot-receipts'               => ['controller' => 'LotPaymentsController', 'action' => 'receipts'],
      // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],  // lo agregamos después
     ],
 
@@ -120,6 +123,8 @@ $routes = [
         'lot-sales/cancel/(\d+)' => ['controller' => 'LotSalesController', 'action' => 'cancel'],
         'lot-reservations/create'        => ['controller' => 'LotReservationsController', 'action' => 'create'],
         'lot-reservations/cancel/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'cancel'],
+        'lot-reservations/confirm-sale/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'confirmSale'],
+        'lot-payments/create'        => ['controller' => 'LotPaymentsController', 'action' => 'create'],
      // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],
         
         ]

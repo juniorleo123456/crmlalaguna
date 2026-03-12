@@ -70,6 +70,14 @@
                                             </button>
                                         <?php endif; ?>
 
+                                        <?php if ($res['reservation_status'] === 'activa'): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-success ms-1" 
+                                                data-bs-toggle="modal" data-bs-target="#confirmSaleModal<?= $res['id'] ?>" 
+                                                title="Confirmar como venta definitiva">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        <?php endif; ?>
+
                                         <!-- Modal de confirmación -->
                                         <div class="modal fade" id="cancelModal<?= $res['id'] ?>" tabindex="-1" aria-labelledby="cancelModalLabel<?= $res['id'] ?>" aria-hidden="true">
                                             <div class="modal-dialog">
@@ -97,6 +105,35 @@
                                             </div>
                                         </div>
                                         <!-- Más adelante: botón Cancelar -->
+
+                                        <!-- Modal de confirmación de venta -->
+                                        <div class="modal fade" id="confirmSaleModal<?= $res['id'] ?>" tabindex="-1" aria-labelledby="confirmSaleModalLabel<?= $res['id'] ?>" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="confirmSaleModalLabel<?= $res['id'] ?>">Confirmar Venta #<?= $res['id'] ?></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>¿Desea convertir esta reserva en una venta definitiva?</p>
+                                                        <ul>
+                                                            <li><strong>Lote:</strong> <?= htmlspecialchars($res['lot_number']) ?></li>
+                                                            <li><strong>Cliente:</strong> <?= htmlspecialchars($res['client_name']) ?></li>
+                                                            <li><strong>Monto pagado:</strong> S/ <?= number_format($res['amount'], 2) ?></li>
+                                                            <li><strong>Fecha expiración:</strong> <?= date('d/m/Y H:i', strtotime($res['expiration_date'])) ?></li>
+                                                        </ul>
+                                                        <p class="text-success">El lote pasará a estado 'vendido' y se creará un registro de venta.</p>
+                                                    </div>
+                                                    <form method="post" action="<?= BASE_URL ?>lot-reservations/confirm-sale/<?= $res['id'] ?>">
+                                                        <input type="hidden" name="csrf_token" value="<?= $this->generateCsrfToken() ?>">
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                            <button type="submit" class="btn btn-success">Sí, Confirmar Venta</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
