@@ -131,12 +131,28 @@ class LotPaymentsController extends Controller
             }
 
             if ($mode === 'create') {
+
+            // Validar que el monto no exceda el saldo pendiente (si está asociado a venta)
+                if (!empty($data['lot_sale_id']) && $data['lot_sale_id'] > 0) {
+                    $sale = $this->saleModel->getById($data['lot_sale_id']);
+                    if ($sale && $sale['balance'] > 0 && $data['amount'] > $sale['balance']) {
+                        $errors[] = "El monto del pago (S/ " . number_format($data['amount'], 2) . ") no puede ser mayor al saldo pendiente (S/ " . number_format($sale['balance'], 2) . ").";
+                    }
+            }               
                 if ($this->paymentModel->create($data)) {
                     $this->setFlash('success', 'Pago registrado correctamente.');
-                    $this->redirect('lot-payments');
-                } else {
-                    $this->setFlash('danger', 'Error al registrar el pago.');
-                }
+
+                    // Redirección inteligente según asociación
+                    if (!empty($data['lot_sale_id']) && $data['lot_sale_id'] > 0) {
+                        $this->redirect('lot-sales');  // vuelve al listado de ventas → ve el saldo actualizado
+                    } elseif (!empty($data['lot_reservation_id']) && $data['lot_reservation_id'] > 0) {
+                        $this->redirect('lot-reservations');  // opcional: si asocias a reserva, vuelve ahí
+                    } else {
+                        $this->redirect('lot-payments');  // sin asociación → vuelve a pagos
+                        }
+                    } else {
+                        $this->setFlash('danger', 'Error al registrar el pago.');
+                    }
             }
             // Edit lo agregamos en la siguiente iteración
         }

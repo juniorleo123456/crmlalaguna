@@ -40,6 +40,13 @@ class LotSalesController extends Controller
     $clients = $this->clientModel->getAll();
     $statuses = ['al_dia', 'atrasado', 'mora', 'cancelado']; // según tu tabla lot_sales
 
+        foreach ($sales as &$sale) {
+        $details = $this->saleModel->getPaymentStatusDetails($sale['id']);
+        $sale['payment_status'] = $details['status']; // actualiza en memoria
+        // Opcional: actualizar en BD si quieres persistirlo
+        // $this->saleModel->updateStatusFromCalculation($sale['id']);
+    }
+
     $this->render('lot-sales/index', [
         'title' => 'Listado de Ventas / Contratos',
         'sales' => $sales,
@@ -98,6 +105,9 @@ class LotSalesController extends Controller
             'discount_percent' => (float) ($_POST['discount_percent'] ?? 0),
             'final_payment_deadline' => trim($_POST['final_payment_deadline'] ?? null),
             'contract_file' => trim($_POST['contract_file'] ?? null),
+            'due_day_of_month' => (int) ($_POST['due_day_of_month'] ?? 7),
+            'grace_days' => (int) ($_POST['grace_days'] ?? 7),
+            'late_fee_rate' => (float) ($_POST['late_fee_rate'] ?? 10.00),
             'notes' => trim($_POST['notes'] ?? '')
         ];
 

@@ -68,6 +68,7 @@
                             <th>Cliente</th>
                             <th>Fecha Venta</th>
                             <th>Precio Total</th>
+                            <th>Saldo Pendiente</th>
                             <th>Estado Pago</th>
                             <th class="text-end">Acciones</th>
                         </tr>
@@ -79,7 +80,37 @@
                                 <td><?= htmlspecialchars($sale['lot_number']) ?></td>
                                 <td><?= htmlspecialchars($sale['client_name']) ?></td>
                                 <td><?= date('d/m/Y', strtotime($sale['sale_date'])) ?></td>
-                                <td>S/ <?= number_format($sale['total_price'], 2) ?></td>
+                                <td>
+    S/ <?= number_format($sale['total_price'], 2) ?><br>
+    <small>
+        Interés: S/ <?= number_format(
+    ($sale['total_with_interest'] ?? $sale['total_price']) - $sale['total_price'], 
+    2
+) ?>
+    </small>
+</td>
+
+<td>
+    <strong>S/ <?= number_format($sale['balance'], 2) ?></strong>
+
+    <small class="text-muted">
+        (Pagado: 
+        S/ <?= number_format(
+            ($sale['total_with_interest'] ?? $sale['total_price']) - $sale['balance'], 
+            2
+        ) ?>)
+    </small>
+
+    <?php if ($sale['balance'] <= 0): ?>
+        <span class="badge bg-success ms-2">Pagado</span>
+
+    <?php elseif ($sale['balance'] < ($sale['total_with_interest'] ?? $sale['total_price']) * 0.1): ?>
+        <span class="badge bg-warning ms-2">Casi pagado</span>
+
+    <?php else: ?>
+        <span class="badge bg-info ms-2">Pendiente</span>
+    <?php endif; ?>
+</td>
                                 <td>
                                     <span class="badge bg-<?= match ($sale['payment_status']) {
                                                                 'al_dia' => 'success',

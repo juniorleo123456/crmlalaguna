@@ -64,31 +64,65 @@ class LotPaymentsModel
     /**
      * Crea un nuevo pago
      */
+    /**
+     * Crea un nuevo pago y descuenta del balance si está asociado a una venta
+     * @param array $data Datos del pago
+     * @return int ID del pago creado o 0 si falla
+     */
     public function create(array $data): int
     {
-        $stmt = $this->pdo->prepare("
+        $this->pdo->beginTransaction();
+
+        try {
+            $stmt = $this->pdo->prepare("
             INSERT INTO lot_payments 
             (lot_sale_id, lot_reservation_id, payment_date, amount, payment_type, 
              payment_method, receipt_number, receipt_file, is_late, late_fee, 
              notes, registered_by, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
-        $stmt->execute([
-            $data['lot_sale_id'] ?? null,
-            $data['lot_reservation_id'] ?? null,
-            $data['payment_date'] ?? date('Y-m-d'),
-            $data['amount'],
-            $data['payment_type'],
-            $data['payment_method'] ?? 'efectivo',
-            $data['receipt_number'] ?? null,
-            $data['receipt_file'] ?? null,
-            $data['is_late'] ?? 0,
-            $data['late_fee'] ?? 0.00,
-            $data['notes'] ?? null,
-            $_SESSION['user_id'] ?? null
-        ]);
 
-        return (int) $this->pdo->lastInsertId();
+            $stmt->execute([
+                $data['lot_sale_id'] ?? null,
+                $data['lot_reservation_id'] ?? null,
+                $data['payment_date'] ?? date('Y-m-d'),
+                $data['amount'],
+                $data['payment_type'],
+                $data['payment_method'] ?? 'efectivo',
+                $data['receipt_number'] ?? null,
+                $data['receipt_file'] ?? null,
+                $data['is_late'] ?? 0,
+                $data['late_fee'] ?? 0.00,
+                $data['notes'] ?? null,
+                $_SESSION['user_id'] ?? null
+            ]);
+
+            $paymentId = (int) $this->pdo->lastInsertId();
+
+            error_log("Intentando crear pago - lot_sale_id: " . var_export($data['lot_sale_id'], true));
+
+            // Descontar del balance si está asociado a una venta
+            if (!empty($data['lot_sale_id'])) {
+                $stmt = $this->pdo->prepare("
+                UPDATE lot_sales 
+                SET balance = GREATEST(balance - ?, 0),
+                    updated_at = NOW()
+                WHERE id = ?
+            ");
+                $executed = $stmt->execute([$data['amount'], $data['lot_sale_id']]);
+
+                if (!$executed || $stmt->rowCount() === 0) {
+                    error_log("No se pudo actualizar balance de venta ID {$data['lot_sale_id']}");
+                }
+            }
+
+            $this->pdo->commit();
+            return $paymentId;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Error al crear pago: " . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
