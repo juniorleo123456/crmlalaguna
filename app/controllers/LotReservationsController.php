@@ -1,4 +1,5 @@
 <?php
+
 // app/controllers/LotReservationsController.php
 
 class LotReservationsController extends Controller
@@ -16,22 +17,22 @@ class LotReservationsController extends Controller
         }
 
         $this->reservationModel = new LotReservationsModel(getDBConnection());
-        $this->lotModel = new LotModel(getDBConnection());
-        $this->clientModel = new ClientModel(getDBConnection());
+        $this->lotModel         = new LotModel(getDBConnection());
+        $this->clientModel      = new ClientModel(getDBConnection());
     }
 
     public function index()
     {
 
         $expiredCount = $this->reservationModel->expireOldReservations();
-            if ($expiredCount > 0) {
-                $this->setFlash('warning', "Se han expirado $expiredCount reservas por fecha límite.");
-            }
+        if ($expiredCount > 0) {
+            $this->setFlash('warning', "Se han expirado $expiredCount reservas por fecha límite.");
+        }
 
         $reservations = $this->reservationModel->getAll();
 
         $this->render('lot-reservations/index', [
-            'title' => 'Listado de Reservas',
+            'title'        => 'Listado de Reservas',
             'reservations' => $reservations
         ]);
     }
@@ -43,7 +44,7 @@ class LotReservationsController extends Controller
 
     private function form(string $mode, int $id = 0)
     {
-        $data = [];
+        $data  = [];
         $title = $mode === 'create' ? 'Nueva Reserva' : 'Editar Reserva';
 
         if ($mode === 'edit') {
@@ -54,29 +55,35 @@ class LotReservationsController extends Controller
             }
         }
 
-        $lots = $this->lotModel->getAll(); // Filtrar solo 'disponible' más adelante
+        $lots    = $this->lotModel->getAll(); // Filtrar solo 'disponible' más adelante
         $clients = $this->clientModel->getAll();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = $_POST['csrf_token'] ?? '';
             if (!$this->validateCsrfToken($token)) {
                 $this->setFlash('danger', 'Error de seguridad.');
-                $this->redirect("lot-reservations/{$mode}" . ($id ? "/$id" : ""));
+                $this->redirect("lot-reservations/{$mode}" . ($id ? "/$id" : ''));
             }
 
             $data = [
-                'lot_id' => (int) ($_POST['lot_id'] ?? 0),
-                'client_id' => (int) ($_POST['client_id'] ?? 0),
+                'lot_id'           => (int) ($_POST['lot_id'] ?? 0),
+                'client_id'        => (int) ($_POST['client_id'] ?? 0),
                 'reservation_date' => trim($_POST['reservation_date'] ?? date('Y-m-d H:i:s')),
-                'expiration_date' => trim($_POST['expiration_date'] ?? date('Y-m-d H:i:s', strtotime('+30 days'))),
-                'amount' => (float) ($_POST['amount'] ?? 300.00),
-                'notes' => trim($_POST['notes'] ?? '')
+                'expiration_date'  => trim($_POST['expiration_date'] ?? date('Y-m-d H:i:s', strtotime('+30 days'))),
+                'amount'           => (float) ($_POST['amount'] ?? 300.00),
+                'notes'            => trim($_POST['notes'] ?? '')
             ];
 
             $errors = [];
-            if ($data['lot_id'] <= 0) $errors[] = 'Selecciona un lote válido';
-            if ($data['client_id'] <= 0) $errors[] = 'Selecciona un cliente válido';
-            if ($data['amount'] <= 0) $errors[] = 'Ingresa un monto válido';
+            if ($data['lot_id'] <= 0) {
+                $errors[] = 'Selecciona un lote válido';
+            }
+            if ($data['client_id'] <= 0) {
+                $errors[] = 'Selecciona un cliente válido';
+            }
+            if ($data['amount'] <= 0) {
+                $errors[] = 'Ingresa un monto válido';
+            }
 
             // Validación extra: lote debe estar disponible (solo en create)
             if ($mode === 'create') {
@@ -89,13 +96,14 @@ class LotReservationsController extends Controller
             if (!empty($errors)) {
                 $this->setFlash('danger', implode('<br>', $errors));
                 $this->render('lot-reservations/form', [
-                    'title' => $title,
-                    'data' => $data,
-                    'mode' => $mode,
-                    'id' => $id,
-                    'lots' => $lots,
+                    'title'   => $title,
+                    'data'    => $data,
+                    'mode'    => $mode,
+                    'id'      => $id,
+                    'lots'    => $lots,
                     'clients' => $clients
                 ]);
+
                 return;
             }
 
@@ -114,59 +122,59 @@ class LotReservationsController extends Controller
         }
 
         $this->render('lot-reservations/form', [
-            'title' => $title,
-            'data' => $data,
-            'mode' => $mode,
-            'id' => $id,
-            'lots' => $lots,
+            'title'   => $title,
+            'data'    => $data,
+            'mode'    => $mode,
+            'id'      => $id,
+            'lots'    => $lots,
             'clients' => $clients
         ]);
     }
 
     public function cancel(int $id)
-{
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        $this->setFlash('danger', 'Acción no permitida.');
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->setFlash('danger', 'Acción no permitida.');
+            $this->redirect('lot-reservations');
+        }
+
+        $token = $_POST['csrf_token'] ?? '';
+        if (!$this->validateCsrfToken($token)) {
+            $this->setFlash('danger', 'Error de seguridad.');
+            $this->redirect('lot-reservations');
+        }
+
+        $reason = trim($_POST['reason'] ?? '');
+
+        if ($this->reservationModel->cancel($id, $reason)) {
+            $this->setFlash('success', 'Reserva cancelada correctamente. El lote ha sido liberado.');
+        } else {
+            $this->setFlash('danger', 'Error al cancelar la reserva.');
+        }
+
         $this->redirect('lot-reservations');
     }
 
-    $token = $_POST['csrf_token'] ?? '';
-    if (!$this->validateCsrfToken($token)) {
-        $this->setFlash('danger', 'Error de seguridad.');
+    public function confirmSale(int $id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->setFlash('danger', 'Acción no permitida.');
+            $this->redirect('lot-reservations');
+        }
+
+        $token = $_POST['csrf_token'] ?? '';
+        if (!$this->validateCsrfToken($token)) {
+            $this->setFlash('danger', 'Error de seguridad.');
+            $this->redirect('lot-reservations');
+        }
+
+        try {
+            $saleId = $this->reservationModel->confirmSale($id);
+            $this->setFlash('success', "Reserva convertida en venta exitosamente (Venta #{$saleId}). Lote marcado como vendido.");
+        } catch (Exception $e) {
+            $this->setFlash('danger', 'Error al confirmar la venta: ' . $e->getMessage());
+        }
+
         $this->redirect('lot-reservations');
     }
-
-    $reason = trim($_POST['reason'] ?? '');
-
-    if ($this->reservationModel->cancel($id, $reason)) {
-        $this->setFlash('success', 'Reserva cancelada correctamente. El lote ha sido liberado.');
-    } else {
-        $this->setFlash('danger', 'Error al cancelar la reserva.');
-    }
-
-    $this->redirect('lot-reservations');
-}
-
-public function confirmSale(int $id)
-{
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        $this->setFlash('danger', 'Acción no permitida.');
-        $this->redirect('lot-reservations');
-    }
-
-    $token = $_POST['csrf_token'] ?? '';
-    if (!$this->validateCsrfToken($token)) {
-        $this->setFlash('danger', 'Error de seguridad.');
-        $this->redirect('lot-reservations');
-    }
-
-    try {
-        $saleId = $this->reservationModel->confirmSale($id);
-        $this->setFlash('success', "Reserva convertida en venta exitosamente (Venta #{$saleId}). Lote marcado como vendido.");
-    } catch (Exception $e) {
-        $this->setFlash('danger', 'Error al confirmar la venta: ' . $e->getMessage());
-    }
-
-    $this->redirect('lot-reservations');
-}
 }

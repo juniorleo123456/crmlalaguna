@@ -57,8 +57,8 @@
                                 </td>
                                 <td data-label="Estado">
                                     <span class="badge rounded-pill bg-<?= $client['status'] === 'active' ? 'success' : 'secondary' ?>">
-                                        <i class="bi bi-<?= $client['status'] === 'active' ? 'check-circle' : 'slash-circle' ?> me-1"></i>
-                                        <?= $client['status'] === 'active' ? 'Activo' : 'Inactivo' ?>
+                                        <i class="bi bi-<?= $client['status']                === 'active' ? 'check-circle' : 'slash-circle' ?> me-1"></i>
+                                        <?= $client['status']                                === 'active' ? 'Activo' : 'Inactivo' ?>
                                     </span>
                                 </td>
                                 <td data-label="Acciones" class="text-end">
@@ -73,8 +73,8 @@
                                         </a>
                                         <a href="<?= BASE_URL ?>clients/toggle/<?= $client['id'] ?>"
                                             class="btn btn-outline-<?= $client['status'] === 'active' ? 'warning' : 'success' ?>"
-                                            title="<?= $client['status'] === 'active' ? 'Desactivar' : 'Activar' ?>">
-                                            <i class="bi bi-<?= $client['status'] === 'active' ? 'toggle-off' : 'toggle-on' ?>"></i>
+                                            title="<?= $client['status']                 === 'active' ? 'Desactivar' : 'Activar' ?>">
+                                            <i class="bi bi-<?= $client['status']        === 'active' ? 'toggle-off' : 'toggle-on' ?>"></i>
                                         </a>
                                     </div>
                                 </td>

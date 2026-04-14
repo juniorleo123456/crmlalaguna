@@ -44,9 +44,9 @@
                             <label class="form-label fw-bold">Estado actual</label>
                             <select name="status" class="form-select" required>
                                 <option value="planificacion" <?= ($data['status'] ?? 'planificacion') === 'planificacion' ? 'selected' : '' ?>>Planificación</option>
-                                <option value="ejecucion" <?= ($data['status'] ?? '') === 'ejecucion' ? 'selected' : '' ?>>Ejecución</option>
-                                <option value="entregado" <?= ($data['status'] ?? '') === 'entregado' ? 'selected' : '' ?>>Entregado</option>
-                                <option value="cancelado" <?= ($data['status'] ?? '') === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
+                                <option value="ejecucion" <?= ($data['status'] ?? '')                  === 'ejecucion' ? 'selected' : '' ?>>Ejecución</option>
+                                <option value="entregado" <?= ($data['status'] ?? '')                  === 'entregado' ? 'selected' : '' ?>>Entregado</option>
+                                <option value="cancelado" <?= ($data['status'] ?? '')                  === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
                             </select>
                         </div>
 

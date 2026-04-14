@@ -1,4 +1,5 @@
 <?php
+
 // app/controllers/DashboardController.php
 
 class DashboardController extends Controller
@@ -19,7 +20,7 @@ class DashboardController extends Controller
             'admin'   => "¡Bienvenido al panel de administración, {$user['name']}! Gestiona clientes, proyectos y socios.",
             'socio'   => "¡Hola {$user['name']}! Aquí tienes el resumen de tus servicios y comisiones.",
             'cliente' => "¡Bienvenido a tu área personal, {$user['name']}! Revisa tus pagos y estado de tu lote.",
-            default   => "¡Bienvenido al sistema!"
+            default   => '¡Bienvenido al sistema!'
         };
 
         // Estadísticas básicas (simuladas aquí, en producción vendrían de la base de datos)
@@ -29,10 +30,10 @@ class DashboardController extends Controller
         $lotSaleModel = new LotSale(getDBConnection());
 
         // Conteos reales
-        $activeProjects   = $projectModel->countActive();
-        $totalClients     = $clientModel->countTotal();
-        $pendingPayments  = $lotSaleModel->countPendingPayments();
-        $totalMora        = $lotSaleModel->getTotalMora();
+        $activeProjects  = $projectModel->countActive();
+        $totalClients    = $clientModel->countTotal();
+        $pendingPayments = $lotSaleModel->countPendingPayments();
+        $totalMora       = $lotSaleModel->getTotalMora();
 
         // Tarjetas por rol (usando datos reales donde aplique)
         $stats = match ($user['role']) {

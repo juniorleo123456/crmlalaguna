@@ -1,4 +1,5 @@
 <?php
+
 // app/controllers/ProjectsController.php
 
 class ProjectsController extends Controller
@@ -19,29 +20,29 @@ class ProjectsController extends Controller
     }
 
     public function index()
-{
-    $page = (int) ($_GET['page'] ?? 1);
-    $perPage = 10; // puedes mover a constante o config más adelante
-    $search = trim($_GET['search'] ?? '');
-    $status = trim($_GET['status'] ?? '');
-    $clientId = (int) ($_GET['client_id'] ?? 0);
+    {
+        $page     = (int) ($_GET['page'] ?? 1);
+        $perPage  = 10; // puedes mover a constante o config más adelante
+        $search   = trim($_GET['search'] ?? '');
+        $status   = trim($_GET['status'] ?? '');
+        $clientId = (int) ($_GET['client_id'] ?? 0);
 
-    $projects = $this->projectModel->getAllFiltered($page, $perPage, $search, $status, $clientId);
-    $total = $this->projectModel->countFiltered($search, $status, $clientId);
-    $totalPages = max(1, ceil($total / $perPage));
-    $statuses = $this->projectModel->getStatuses();
+        $projects   = $this->projectModel->getAllFiltered($page, $perPage, $search, $status, $clientId);
+        $total      = $this->projectModel->countFiltered($search, $status, $clientId);
+        $totalPages = max(1, ceil($total / $perPage));
+        $statuses   = $this->projectModel->getStatuses();
 
-    $this->render('projects/index', [
-        'title'       => 'Listado de Proyectos',
-        'projects'    => $projects,
-        'page'        => $page,
-        'totalPages'  => $totalPages,
-        'search'      => $search,
-        'status'      => $status,
-        'client_id'   => $clientId,
-        'statuses'    => $statuses
-    ]);
-}
+        $this->render('projects/index', [
+            'title'      => 'Listado de Proyectos',
+            'projects'   => $projects,
+            'page'       => $page,
+            'totalPages' => $totalPages,
+            'search'     => $search,
+            'status'     => $status,
+            'client_id'  => $clientId,
+            'statuses'   => $statuses
+        ]);
+    }
 
     public function create()
     {
@@ -55,7 +56,7 @@ class ProjectsController extends Controller
 
     private function form(string $mode, int $id = 0)
     {
-        $data = [];
+        $data  = [];
         $title = $mode === 'create' ? 'Nuevo Proyecto' : 'Editar Proyecto';
 
         if ($mode === 'edit') {
@@ -71,7 +72,7 @@ class ProjectsController extends Controller
             $token = $_POST['csrf_token'] ?? '';
             if (!$this->validateCsrfToken($token)) {
                 $this->setFlash('danger', 'Error de validación de seguridad.');
-                $this->redirect("projects/{$mode}" . ($id ? "/$id" : ""));
+                $this->redirect("projects/{$mode}" . ($id ? "/$id" : ''));
             }
 
             // Recoger datos
@@ -86,8 +87,12 @@ class ProjectsController extends Controller
 
             // Validaciones básicas
             $errors = [];
-            if (empty($data['title'])) $errors[] = 'El título del proyecto es obligatorio';
-            if ($data['progress'] < 0 || $data['progress'] > 100) $errors[] = 'Progreso debe estar entre 0 y 100';
+            if (empty($data['title'])) {
+                $errors[] = 'El título del proyecto es obligatorio';
+            }
+            if ($data['progress'] < 0 || $data['progress'] > 100) {
+                $errors[] = 'Progreso debe estar entre 0 y 100';
+            }
 
             if (!empty($errors)) {
                 $this->setFlash('danger', implode('<br>', $errors));
@@ -97,6 +102,7 @@ class ProjectsController extends Controller
                     'mode'  => $mode,
                     'id'    => $id
                 ]);
+
                 return;
             }
 
@@ -136,13 +142,13 @@ class ProjectsController extends Controller
         }
 
         // Ciclo simple entre estados (puedes cambiar a un select en el formulario si prefieres)
-        $statuses = ['planificacion', 'ejecucion', 'entregado', 'cancelado'];
+        $statuses     = ['planificacion', 'ejecucion', 'entregado', 'cancelado'];
         $currentIndex = array_search($project['status'], $statuses);
-        $nextIndex = ($currentIndex + 1) % count($statuses);
-        $newStatus = $statuses[$nextIndex];
+        $nextIndex    = ($currentIndex + 1) % count($statuses);
+        $newStatus    = $statuses[$nextIndex];
 
         if ($this->projectModel->changeStatus($id, $newStatus)) {
-            $this->setFlash('success', "Estado del proyecto actualizado a <strong>" . ucfirst($newStatus) . "</strong>.");
+            $this->setFlash('success', 'Estado del proyecto actualizado a <strong>' . ucfirst($newStatus) . '</strong>.');
         } else {
             $this->setFlash('danger', 'Error al cambiar el estado del proyecto.');
         }

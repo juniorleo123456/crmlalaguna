@@ -36,7 +36,7 @@
                     <dt class="col-sm-4">Estado</dt>
                     <dd class="col-sm-8">
                         <span class="badge bg-<?= $client['status'] === 'active' ? 'success' : 'secondary' ?>">
-                            <?= $client['status'] === 'active' ? 'Activo' : 'Inactivo' ?>
+                            <?= $client['status']                   === 'active' ? 'Activo' : 'Inactivo' ?>
                         </span>
                     </dd>
 

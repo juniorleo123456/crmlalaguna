@@ -58,8 +58,8 @@
                                 </td>
                                 <td data-label="Estado">
                                     <span class="badge rounded-pill bg-<?= $block['status'] === 'active' ? 'success' : 'secondary' ?>">
-                                        <i class="bi bi-<?= $block['status'] === 'active' ? 'check-circle' : 'slash-circle' ?> me-1"></i>
-                                        <?= $block['status'] === 'active' ? 'Activa' : 'Inactiva' ?>
+                                        <i class="bi bi-<?= $block['status']                === 'active' ? 'check-circle' : 'slash-circle' ?> me-1"></i>
+                                        <?= $block['status']                                === 'active' ? 'Activa' : 'Inactiva' ?>
                                     </span>
                                 </td>
                                 <td data-label="Acciones" class="text-end">
@@ -70,8 +70,8 @@
                                         </a>
                                         <a href="<?= BASE_URL ?>blocks/toggle/<?= $block['id'] ?>"
                                             class="btn btn-outline-<?= $block['status'] === 'active' ? 'warning' : 'success' ?>"
-                                            title="<?= $block['status'] === 'active' ? 'Desactivar' : 'Activar' ?>">
-                                            <i class="bi bi-<?= $block['status'] === 'active' ? 'toggle-off' : 'toggle-on' ?>"></i>
+                                            title="<?= $block['status']                 === 'active' ? 'Desactivar' : 'Activar' ?>">
+                                            <i class="bi bi-<?= $block['status']        === 'active' ? 'toggle-off' : 'toggle-on' ?>"></i>
                                         </a>
                                     </div>
                                 </td>

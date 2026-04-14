@@ -51,7 +51,7 @@
                                         'cancelada'  => 'bg-danger',
                                         default      => 'bg-secondary'
                                     };
-                                    ?>
+                            ?>
                                     <span class="badge rounded-pill <?= $badgeClass ?>">
                                         <?= ucfirst($res['reservation_status']) ?>
                                     </span>

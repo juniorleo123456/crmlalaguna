@@ -64,11 +64,11 @@
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Método de pago</label>
                     <select name="payment_method" class="form-select">
-                        <option value="efectivo" <?= ($data['payment_method'] ?? '') === 'efectivo' ? 'selected' : '' ?>>Efectivo</option>
+                        <option value="efectivo" <?= ($data['payment_method'] ?? '')      === 'efectivo' ? 'selected' : '' ?>>Efectivo</option>
                         <option value="transferencia" <?= ($data['payment_method'] ?? '') === 'transferencia' ? 'selected' : '' ?>>Transferencia</option>
-                        <option value="deposito" <?= ($data['payment_method'] ?? '') === 'deposito' ? 'selected' : '' ?>>Depósito</option>
-                        <option value="tarjeta" <?= ($data['payment_method'] ?? '') === 'tarjeta' ? 'selected' : '' ?>>Tarjeta</option>
-                        <option value="otro" <?= ($data['payment_method'] ?? '') === 'otro' ? 'selected' : '' ?>>Otro</option>
+                        <option value="deposito" <?= ($data['payment_method'] ?? '')      === 'deposito' ? 'selected' : '' ?>>Depósito</option>
+                        <option value="tarjeta" <?= ($data['payment_method'] ?? '')       === 'tarjeta' ? 'selected' : '' ?>>Tarjeta</option>
+                        <option value="otro" <?= ($data['payment_method'] ?? '')          === 'otro' ? 'selected' : '' ?>>Otro</option>
                     </select>
                 </div>
 

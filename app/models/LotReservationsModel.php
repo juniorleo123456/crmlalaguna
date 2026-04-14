@@ -1,4 +1,5 @@
 <?php
+
 // app/models/LotReservationsModel.php
 
 class LotReservationsModel
@@ -12,7 +13,7 @@ class LotReservationsModel
 
     public function getAll(): array
     {
-        $stmt = $this->pdo->query("
+        $stmt = $this->pdo->query('
             SELECT lr.*, 
                    l.lot_number, l.block_id, b.name AS block_name, p.title AS project_title,
                    u.name AS client_name, u.email AS client_email,
@@ -24,13 +25,14 @@ class LotReservationsModel
             LEFT JOIN clients c ON lr.client_id = c.id
             LEFT JOIN users u ON c.user_id = u.id
             ORDER BY lr.reservation_date DESC
-        ");
+        ');
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getById(int $id): ?array
     {
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             SELECT lr.*, 
                    l.lot_number, l.block_id, b.name AS block_name, p.title AS project_title,
                    u.name AS client_name, u.email AS client_email
@@ -41,8 +43,9 @@ class LotReservationsModel
             LEFT JOIN clients c ON lr.client_id = c.id
             LEFT JOIN users u ON c.user_id = u.id
             WHERE lr.id = ?
-        ");
+        ');
         $stmt->execute([$id]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
@@ -58,19 +61,19 @@ class LotReservationsModel
             $data['lot_id'],
             $data['client_id'],
             $data['reservation_date'] ?? date('Y-m-d H:i:s'),
-            $data['expiration_date'] ?? date('Y-m-d H:i:s', strtotime('+30 days')),
-            $data['amount'] ?? 300.00,
-            $data['notes'] ?? null,
-            $_SESSION['user_id'] ?? null
+            $data['expiration_date']  ?? date('Y-m-d H:i:s', strtotime('+30 days')),
+            $data['amount']           ?? 300.00,
+            $data['notes']            ?? null,
+            $_SESSION['user_id']      ?? null
         ]);
+
         return (int) $this->pdo->lastInsertId();
     }
 
     /**
      * Cancela una reserva y libera el lote
-     * @param int $id ID de la reserva
+     * @param int    $id     ID de la reserva
      * @param string $reason Motivo opcional
-     * @return bool
      */
     public function cancel(int $id, string $reason = ''): bool
     {
@@ -78,20 +81,20 @@ class LotReservationsModel
 
         try {
             // 1. Obtener la reserva y su lote
-            $stmt = $this->pdo->prepare("
+            $stmt = $this->pdo->prepare('
             SELECT lr.lot_id, lr.status
             FROM lot_reservations lr
             WHERE lr.id = ?
-        ");
+        ');
             $stmt->execute([$id]);
             $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$reservation) {
-                throw new Exception("Reserva no encontrada");
+                throw new Exception('Reserva no encontrada');
             }
 
             if ($reservation['status'] === 'cancelada') {
-                throw new Exception("La reserva ya está cancelada");
+                throw new Exception('La reserva ya está cancelada');
             }
 
             // 2. Marcar reserva como cancelada
@@ -126,10 +129,12 @@ class LotReservationsModel
             ]);
 
             $this->pdo->commit();
+
             return true;
         } catch (Exception $e) {
             $this->pdo->rollBack();
             error_log("Error al cancelar reserva ID {$id}: " . $e->getMessage());
+
             return false;
         }
     }
@@ -166,8 +171,8 @@ class LotReservationsModel
 
     /**
      * Convierte una reserva confirmada en venta definitiva
-     * @param int $id ID de la reserva
-     * @return int ID de la nueva venta creada
+     * @param  int       $id ID de la reserva
+     * @return int       ID de la nueva venta creada
      * @throws Exception si no se puede convertir
      */
     public function confirmSale(int $id): int
@@ -186,7 +191,7 @@ class LotReservationsModel
             $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$reservation) {
-                throw new Exception("Reserva no encontrada o no convertible");
+                throw new Exception('Reserva no encontrada o no convertible');
             }
 
             // 2. Crear registro en lot_sales
@@ -240,6 +245,7 @@ class LotReservationsModel
             ]);
 
             $this->pdo->commit();
+
             return $saleId;
         } catch (Exception $e) {
             $this->pdo->rollBack();

@@ -70,10 +70,10 @@
                             <label class="form-label fw-bold">Estado *</label>
                             <select name="status" class="form-select" required>
                                 <option value="disponible" <?= ($data['status'] ?? 'disponible') === 'disponible' ? 'selected' : '' ?>>Disponible</option>
-                                <option value="reservado" <?= ($data['status'] ?? '') === 'reservado' ? 'selected' : '' ?>>Reservado</option>
-                                <option value="vendido" <?= ($data['status'] ?? '') === 'vendido' ? 'selected' : '' ?>>Vendido</option>
-                                <option value="mora" <?= ($data['status'] ?? '') === 'mora' ? 'selected' : '' ?>>Mora</option>
-                                <option value="cancelado" <?= ($data['status'] ?? '') === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
+                                <option value="reservado" <?= ($data['status'] ?? '')            === 'reservado' ? 'selected' : '' ?>>Reservado</option>
+                                <option value="vendido" <?= ($data['status'] ?? '')              === 'vendido' ? 'selected' : '' ?>>Vendido</option>
+                                <option value="mora" <?= ($data['status'] ?? '')                 === 'mora' ? 'selected' : '' ?>>Mora</option>
+                                <option value="cancelado" <?= ($data['status'] ?? '')            === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
                             </select>
                         </div>
 

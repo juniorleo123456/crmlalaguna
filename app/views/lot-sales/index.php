@@ -81,46 +81,52 @@
                                 <td><?= htmlspecialchars($sale['client_name']) ?></td>
                                 <td><?= date('d/m/Y', strtotime($sale['sale_date'])) ?></td>
                                 <td>
-    S/ <?= number_format($sale['total_price'], 2) ?><br>
-    <small>
-        Interés: S/ <?= number_format(
-    ($sale['total_with_interest'] ?? $sale['total_price']) - $sale['total_price'], 
-    2
-) ?>
-    </small>
-</td>
+                                    S/ <?= number_format($sale['total_price'], 2) ?><br>
+                                    <small>
+                                        Interés: S/ <?= number_format(
+                                            ($sale['total_with_interest'] ?? $sale['total_price']) - $sale['total_price'],
+                                            2
+                                        ) ?>
+                                    </small>
+                                </td>
 
-<td>
-    <strong>S/ <?= number_format($sale['balance'], 2) ?></strong>
+                                <td>
+                                    <strong>S/ <?= number_format($sale['balance'], 2) ?></strong>
 
-    <small class="text-muted">
-        (Pagado: 
-        S/ <?= number_format(
-            ($sale['total_with_interest'] ?? $sale['total_price']) - $sale['balance'], 
-            2
-        ) ?>)
-    </small>
+                                    <small class="text-muted">
+                                        (Pagado:
+                                        S/ <?= number_format(
+                                            ($sale['total_with_interest'] ?? $sale['total_price']) - $sale['balance'],
+                                            2
+                                        ) ?>)
+                                    </small>
 
-    <?php if ($sale['balance'] <= 0): ?>
-        <span class="badge bg-success ms-2">Pagado</span>
+                                    <?php if ($sale['balance'] <= 0): ?>
+                                        <span class="badge bg-success ms-2">Pagado</span>
 
-    <?php elseif ($sale['balance'] < ($sale['total_with_interest'] ?? $sale['total_price']) * 0.1): ?>
-        <span class="badge bg-warning ms-2">Casi pagado</span>
+                                    <?php elseif ($sale['balance'] < ($sale['total_with_interest'] ?? $sale['total_price']) * 0.1): ?>
+                                        <span class="badge bg-warning ms-2">Casi pagado</span>
 
-    <?php else: ?>
-        <span class="badge bg-info ms-2">Pendiente</span>
-    <?php endif; ?>
-</td>
+                                    <?php else: ?>
+                                        <span class="badge bg-info ms-2">Pendiente</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <span class="badge bg-<?= match ($sale['payment_status']) {
-                                                                'al_dia' => 'success',
-                                                                'atrasado' => 'warning',
-                                                                'mora' => 'danger',
-                                                                'cancelado' => 'secondary',
-                                                                default => 'light text-dark'
-                                                            } ?>">
+                                        'al_dia'    => 'success',
+                                        'atrasado'  => 'warning',
+                                        'mora'      => 'danger',
+                                        'cancelado' => 'secondary',
+                                        default     => 'light text-dark'
+                                    } ?>">
                                         <?= ucfirst($sale['payment_status']) ?>
                                     </span>
+                                    <?php if (isset($sale['late_fee_due']) && $sale['late_fee_due'] > 0): ?>
+                                        <br>
+                                        <small class="text-danger">
+                                            Mora pendiente: S/ <?= number_format($sale['late_fee_due'], 2) ?>
+                                        </small>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm">

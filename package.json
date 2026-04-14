@@ -1,0 +1,24 @@
+{
+  "name": "crmlalaguna1.0",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juniorleo123456/crmlalaguna.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/juniorleo123456/crmlalaguna/issues"
+  },
+  "homepage": "https://github.com/juniorleo123456/crmlalaguna#readme",
+  "description": "",
+  "devDependencies": {
+    "@prettier/plugin-php": "^0.25.0",
+    "prettier": "3.8.1"
+  }
+}

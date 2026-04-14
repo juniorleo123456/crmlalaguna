@@ -1,4 +1,5 @@
 <?php
+
 // app/core/RateLimiter.php
 
 class RateLimiter
@@ -9,7 +10,7 @@ class RateLimiter
 
     public function __construct(PDO $pdo)
     {
-        $this->pdo = $pdo;
+        $this->pdo           = $pdo;
         $this->maxAttempts   = 3;      // Puedes mover a .env o constante más adelante
         $this->windowSeconds = 300;    // 5 minutos
     }
@@ -20,19 +21,20 @@ class RateLimiter
     public function isBlocked(string $ip, string $action = 'login'): bool
     {
         try {
-            $stmt = $this->pdo->prepare("
+            $stmt = $this->pdo->prepare('
                 SELECT COUNT(*) as attempts
                 FROM rate_limits
                 WHERE ip_address = ? 
                   AND action = ? 
                   AND created_at > DATE_SUB(NOW(), INTERVAL ? SECOND)
-            ");
+            ');
             $stmt->execute([$ip, $action, $this->windowSeconds]);
             $attempts = (int) $stmt->fetchColumn();
 
             return $attempts >= $this->maxAttempts;
         } catch (Exception $e) {
-            error_log("RateLimiter error: " . $e->getMessage());
+            error_log('RateLimiter error: ' . $e->getMessage());
+
             return false; // fail-safe: no bloquear si falla BD
         }
     }
@@ -43,11 +45,11 @@ class RateLimiter
     public function getRemainingTime(string $ip, string $action = 'login'): int
     {
         try {
-            $stmt = $this->pdo->prepare("
+            $stmt = $this->pdo->prepare('
                 SELECT MAX(created_at) as last_attempt
                 FROM rate_limits
                 WHERE ip_address = ? AND action = ?
-            ");
+            ');
             $stmt->execute([$ip, $action]);
             $last = $stmt->fetchColumn();
 
@@ -55,7 +57,7 @@ class RateLimiter
                 return 0;
             }
 
-            $blockEnd = strtotime($last) + $this->windowSeconds;
+            $blockEnd  = strtotime($last) + $this->windowSeconds;
             $remaining = $blockEnd - time();
 
             return max(0, $remaining);
@@ -70,26 +72,26 @@ class RateLimiter
     public function recordAttempt(string $ip, string $action = 'login'): void
     {
         try {
-            $stmt = $this->pdo->prepare("
+            $stmt = $this->pdo->prepare('
                 INSERT INTO rate_limits (ip_address, action, created_at)
                 VALUES (?, ?, NOW())
-            ");
+            ');
             $stmt->execute([$ip, $action]);
 
             // Limpieza automática de registros viejos (opcional)
             $this->cleanOldRecords();
         } catch (Exception $e) {
-            error_log("RateLimiter record error: " . $e->getMessage());
+            error_log('RateLimiter record error: ' . $e->getMessage());
         }
     }
 
     private function cleanOldRecords(): void
     {
         try {
-            $this->pdo->exec("
+            $this->pdo->exec('
                 DELETE FROM rate_limits 
                 WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
-            ");
+            ');
         } catch (Exception $e) {
             // silencioso
         }
@@ -101,13 +103,13 @@ class RateLimiter
     {
         try {
             // Buscamos el intento que hizo que llegara al límite
-            $stmt = $this->pdo->prepare("
+            $stmt = $this->pdo->prepare('
             SELECT created_at
             FROM rate_limits
             WHERE ip_address = ? AND action = ?
             ORDER BY created_at ASC
             LIMIT 1
-        ");
+        ');
             $stmt->execute([$ip, $action]);
             $firstAttempt = $stmt->fetchColumn();
 
@@ -116,8 +118,8 @@ class RateLimiter
             }
 
             $blockStart = strtotime($firstAttempt);
-            $blockEnd = $blockStart + $this->windowSeconds;
-            $remaining = $blockEnd - time();
+            $blockEnd   = $blockStart + $this->windowSeconds;
+            $remaining  = $blockEnd - time();
 
             return max(0, $remaining);
         } catch (Exception $e) {

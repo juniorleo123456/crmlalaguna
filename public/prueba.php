@@ -1,2 +1,3 @@
 <?php
-echo "¡El .htaccess SÍ está funcionando!";
+
+echo '¡El .htaccess SÍ está funcionando!';

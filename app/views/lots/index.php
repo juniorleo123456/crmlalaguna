@@ -86,24 +86,40 @@
                                         'cancelado'  => 'bg-secondary',
                                         default      => 'bg-light text-dark'
                                     };
-                                    ?>
+                            ?>
                                     <span class="badge rounded-pill <?= $badgeClass ?>">
                                         <?= ucfirst($lot['status']) ?>
                                     </span>
                                 </td>
                                 <td data-label="Características">
                                     <?php
-                                    $features = [];
-                                    if ($lot['is_corner']) $features[] = 'Esquinero';
-                                    if ($lot['faces_park']) $features[] = 'Frente a parque';
-                                    if ($lot['faces_main_street']) $features[] = 'Frente a avenida';
-                                    if ($lot['jiron_principal']) $features[] = 'Jirón principal';
-                                    if ($lot['calle_1']) $features[] = 'Calle 1';
-                                    if ($lot['calle_2']) $features[] = 'Calle 2';
-                                    if ($lot['pasaje_1_parque']) $features[] = 'Pasaje 1 (parque)';
-                                    if ($lot['pasaje_2']) $features[] = 'Pasaje 2';
-                                    echo $features ? implode(', ', $features) : '-';
-                                    ?>
+                            $features = [];
+                            if ($lot['is_corner']) {
+                                $features[] = 'Esquinero';
+                            }
+                            if ($lot['faces_park']) {
+                                $features[] = 'Frente a parque';
+                            }
+                            if ($lot['faces_main_street']) {
+                                $features[] = 'Frente a avenida';
+                            }
+                            if ($lot['jiron_principal']) {
+                                $features[] = 'Jirón principal';
+                            }
+                            if ($lot['calle_1']) {
+                                $features[] = 'Calle 1';
+                            }
+                            if ($lot['calle_2']) {
+                                $features[] = 'Calle 2';
+                            }
+                            if ($lot['pasaje_1_parque']) {
+                                $features[] = 'Pasaje 1 (parque)';
+                            }
+                            if ($lot['pasaje_2']) {
+                                $features[] = 'Pasaje 2';
+                            }
+                            echo $features ? implode(', ', $features) : '-';
+                            ?>
                                 </td>
                                 <td data-label="Acciones" class="text-end">
                                     <div class="btn-group btn-group-sm">

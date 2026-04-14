@@ -1,4 +1,5 @@
 <?php
+
 // public/index.php - Punto de entrada único
 
 // Iniciar sesión siempre al principio
@@ -12,8 +13,8 @@ spl_autoload_register(function ($className) {
     // Posibles carpetas donde buscar clases
     $possiblePaths = [
         __DIR__ . '/../app/controllers/' . $className . '.php',
-        __DIR__ . '/../app/core/'       . $className . '.php',
-        __DIR__ . '/../app/models/'     . $className . '.php',
+        __DIR__ . '/../app/core/' . $className . '.php',
+        __DIR__ . '/../app/models/' . $className . '.php',
         // Puedes agregar más carpetas cuando las crees
     ];
 
@@ -21,6 +22,7 @@ spl_autoload_register(function ($className) {
     foreach ($possiblePaths as $path) {
         if (file_exists($path)) {
             require_once $path;
+
             return; // clase encontrada, salimos
         }
     }
@@ -66,86 +68,86 @@ if ($route === '') {
 // =============================================
 $routes = [
     'GET' => [
-        ''           => ['controller' => 'HomeController', 'action' => 'index'], // ← también vale la raíz vacía
-        'home'       => ['controller' => 'HomeController', 'action' => 'index'],
-        'login'      => ['controller' => 'AuthController', 'action' => 'showLogin'],
-        'logout'     => ['controller' => 'AuthController', 'action' => 'logout'],
-        'dashboard'  => ['controller' => 'DashboardController', 'action' => 'index'],
-        'clients'          => ['controller' => 'ClientsController', 'action' => 'index'],
-        'clients/create'   => ['controller' => 'ClientsController', 'action' => 'create'],
-        'clients/edit/(\d+)' => ['controller' => 'ClientsController', 'action' => 'edit'],
-        'clients/toggle/(\d+)' => ['controller' => 'ClientsController', 'action' => 'toggleStatus'],
-        'projects'               => ['controller' => 'ProjectsController', 'action' => 'index'],
-        'projects/create'        => ['controller' => 'ProjectsController', 'action' => 'create'],
-        'projects/edit/(\d+)'    => ['controller' => 'ProjectsController', 'action' => 'edit'],
+        ''                             => ['controller' => 'HomeController', 'action' => 'index'], // ← también vale la raíz vacía
+        'home'                         => ['controller' => 'HomeController', 'action' => 'index'],
+        'login'                        => ['controller' => 'AuthController', 'action' => 'showLogin'],
+        'logout'                       => ['controller' => 'AuthController', 'action' => 'logout'],
+        'dashboard'                    => ['controller' => 'DashboardController', 'action' => 'index'],
+        'clients'                      => ['controller' => 'ClientsController', 'action' => 'index'],
+        'clients/create'               => ['controller' => 'ClientsController', 'action' => 'create'],
+        'clients/edit/(\d+)'           => ['controller' => 'ClientsController', 'action' => 'edit'],
+        'clients/toggle/(\d+)'         => ['controller' => 'ClientsController', 'action' => 'toggleStatus'],
+        'projects'                     => ['controller' => 'ProjectsController', 'action' => 'index'],
+        'projects/create'              => ['controller' => 'ProjectsController', 'action' => 'create'],
+        'projects/edit/(\d+)'          => ['controller' => 'ProjectsController', 'action' => 'edit'],
         'projects/change-status/(\d+)' => ['controller' => 'ProjectsController', 'action' => 'changeStatus'],
-        'blocks'                 => ['controller' => 'BlocksController', 'action' => 'index'],
-        'blocks/create'          => ['controller' => 'BlocksController', 'action' => 'create'],
-        'blocks/edit/(\d+)'      => ['controller' => 'BlocksController', 'action' => 'edit'],
-        'blocks/toggle/(\d+)'    => ['controller' => 'BlocksController', 'action' => 'toggleStatus'],
-        'blocks/change-status/(\d+)' => ['controller' => 'BlocksController', 'action' => 'changeStatus'],
-        'clients/view/(\d+)' => ['controller' => 'ClientsController', 'action' => 'view'],
-        'client-services/create' => ['controller' => 'ClientServicesController', 'action' => 'create'],
-        'lots' => ['controller' => 'LotsController', 'action' => 'index'],
-        'lots/create' => ['controller' => 'LotsController', 'action' => 'create'],
-        'lots/edit/(\d+)' => ['controller' => 'LotsController', 'action' => 'edit'],
-        'lots/toggle/(\d+)' => ['controller' => 'LotsController', 'action' => 'toggleStatus'],
-        'map' => ['controller' => 'LotsController', 'action' => 'map'],
-        'lot-sales'               => ['controller' => 'LotSalesController', 'action' => 'index'],
-        'lot-sales/create'        => ['controller' => 'LotSalesController', 'action' => 'create'],
-        'lot-sales/edit/(\d+)'    => ['controller' => 'LotSalesController', 'action' => 'edit'],
-        'lot-reservations'               => ['controller' => 'LotReservationsController', 'action' => 'index'],
-        'lot-reservations/create'        => ['controller' => 'LotReservationsController', 'action' => 'create'],
-        'lot-payments'               => ['controller' => 'LotPaymentsController', 'action' => 'index'],
-        'lot-payments/create'        => ['controller' => 'LotPaymentsController', 'action' => 'create'],
-        'lot-receipts'               => ['controller' => 'LotPaymentsController', 'action' => 'receipts'],
+        'blocks'                       => ['controller' => 'BlocksController', 'action' => 'index'],
+        'blocks/create'                => ['controller' => 'BlocksController', 'action' => 'create'],
+        'blocks/edit/(\d+)'            => ['controller' => 'BlocksController', 'action' => 'edit'],
+        'blocks/toggle/(\d+)'          => ['controller' => 'BlocksController', 'action' => 'toggleStatus'],
+        'blocks/change-status/(\d+)'   => ['controller' => 'BlocksController', 'action' => 'changeStatus'],
+        'clients/view/(\d+)'           => ['controller' => 'ClientsController', 'action' => 'view'],
+        'client-services/create'       => ['controller' => 'ClientServicesController', 'action' => 'create'],
+        'lots'                         => ['controller' => 'LotsController', 'action' => 'index'],
+        'lots/create'                  => ['controller' => 'LotsController', 'action' => 'create'],
+        'lots/edit/(\d+)'              => ['controller' => 'LotsController', 'action' => 'edit'],
+        'lots/toggle/(\d+)'            => ['controller' => 'LotsController', 'action' => 'toggleStatus'],
+        'map'                          => ['controller' => 'LotsController', 'action' => 'map'],
+        'lot-sales'                    => ['controller' => 'LotSalesController', 'action' => 'index'],
+        'lot-sales/create'             => ['controller' => 'LotSalesController', 'action' => 'create'],
+        'lot-sales/edit/(\d+)'         => ['controller' => 'LotSalesController', 'action' => 'edit'],
+        'lot-reservations'             => ['controller' => 'LotReservationsController', 'action' => 'index'],
+        'lot-reservations/create'      => ['controller' => 'LotReservationsController', 'action' => 'create'],
+        'lot-payments'                 => ['controller' => 'LotPaymentsController', 'action' => 'index'],
+        'lot-payments/create'          => ['controller' => 'LotPaymentsController', 'action' => 'create'],
+        'lot-receipts'                 => ['controller' => 'LotPaymentsController', 'action' => 'receipts'],
      // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],  // lo agregamos después
     ],
 
     'POST' => [
-        'login'      => ['controller' => 'AuthController', 'action' => 'processLogin'],
-        'clients/create'   => ['controller' => 'ClientsController', 'action' => 'create'],
-        'clients/edit/(\d+)' => ['controller' => 'ClientsController', 'action' => 'edit'],
-        'clients/toggle/(\d+)' => ['controller' => 'ClientsController', 'action' => 'toggleStatus'],
-        'projects/create'        => ['controller' => 'ProjectsController', 'action' => 'create'],
-        'projects/edit/(\d+)'    => ['controller' => 'ProjectsController', 'action' => 'edit'],
-        'blocks/create'          => ['controller' => 'BlocksController', 'action' => 'create'],
-        'blocks/edit/(\d+)'      => ['controller' => 'BlocksController', 'action' => 'edit'],
-        'client-services/create' => ['controller' => 'ClientServicesController', 'action' => 'create'],
-        'lots/create' => ['controller' => 'LotsController', 'action' => 'create'],
-        'lots/edit/(\d+)' => ['controller' => 'LotsController', 'action' => 'edit'],
-        'map_left'     => (float) ($_POST['map_left'] ?? 0.00),
-        'map_top'      => (float) ($_POST['map_top'] ?? 0.00),
-        'map_width'    => (float) ($_POST['map_width'] ?? 8.00),
-        'map_height'   => (float) ($_POST['map_height'] ?? 8.00),
-        'lot-sales/create'        => ['controller' => 'LotSalesController', 'action' => 'create'],
-        'lot-sales/edit/(\d+)'    => ['controller' => 'LotSalesController', 'action' => 'edit'],
-        'lot-sales/cancel/(\d+)' => ['controller' => 'LotSalesController', 'action' => 'cancel'],
-        'lot-reservations/create'        => ['controller' => 'LotReservationsController', 'action' => 'create'],
-        'lot-reservations/cancel/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'cancel'],
+        'login'                               => ['controller' => 'AuthController', 'action' => 'processLogin'],
+        'clients/create'                      => ['controller' => 'ClientsController', 'action' => 'create'],
+        'clients/edit/(\d+)'                  => ['controller' => 'ClientsController', 'action' => 'edit'],
+        'clients/toggle/(\d+)'                => ['controller' => 'ClientsController', 'action' => 'toggleStatus'],
+        'projects/create'                     => ['controller' => 'ProjectsController', 'action' => 'create'],
+        'projects/edit/(\d+)'                 => ['controller' => 'ProjectsController', 'action' => 'edit'],
+        'blocks/create'                       => ['controller' => 'BlocksController', 'action' => 'create'],
+        'blocks/edit/(\d+)'                   => ['controller' => 'BlocksController', 'action' => 'edit'],
+        'client-services/create'              => ['controller' => 'ClientServicesController', 'action' => 'create'],
+        'lots/create'                         => ['controller' => 'LotsController', 'action' => 'create'],
+        'lots/edit/(\d+)'                     => ['controller' => 'LotsController', 'action' => 'edit'],
+        'map_left'                            => (float) ($_POST['map_left'] ?? 0.00),
+        'map_top'                             => (float) ($_POST['map_top'] ?? 0.00),
+        'map_width'                           => (float) ($_POST['map_width'] ?? 8.00),
+        'map_height'                          => (float) ($_POST['map_height'] ?? 8.00),
+        'lot-sales/create'                    => ['controller' => 'LotSalesController', 'action' => 'create'],
+        'lot-sales/edit/(\d+)'                => ['controller' => 'LotSalesController', 'action' => 'edit'],
+        'lot-sales/cancel/(\d+)'              => ['controller' => 'LotSalesController', 'action' => 'cancel'],
+        'lot-reservations/create'             => ['controller' => 'LotReservationsController', 'action' => 'create'],
+        'lot-reservations/cancel/(\d+)'       => ['controller' => 'LotReservationsController', 'action' => 'cancel'],
         'lot-reservations/confirm-sale/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'confirmSale'],
-        'lot-payments/create'        => ['controller' => 'LotPaymentsController', 'action' => 'create'],
+        'lot-payments/create'                 => ['controller' => 'LotPaymentsController', 'action' => 'create'],
      // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],
-        
+
         ]
 ];
 
 // =============================================
 // 3. Procesar la ruta
 // =============================================
-$method = $_SERVER['REQUEST_METHOD'];
+$method     = $_SERVER['REQUEST_METHOD'];
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$route = trim($requestUri, '/');
+$route      = trim($requestUri, '/');
 
 $controller = null;
-$action = null;
-$params = [];
+$action     = null;
+$params     = [];
 
 foreach ($routes[$method] ?? [] as $pattern => $target) {
     if (preg_match('#^' . str_replace('(\d+)', '(\d+)', $pattern) . '$#', $route, $matches)) {
         $controller = $target['controller'];
-        $action = $target['action'];
-        $params = array_slice($matches, 1); // extrae los parámetros (ej: el ID)
+        $action     = $target['action'];
+        $params     = array_slice($matches, 1); // extrae los parámetros (ej: el ID)
         break;
     }
 }
@@ -180,6 +182,6 @@ if ($controller && $action) {
 
 // Si llegamos aquí → 404
 http_response_code(404);
-echo "<h1>404 - Página no encontrada</h1>";
-echo "<p>Ruta: <b>" . htmlspecialchars($route) . "</b><br>Método: <b>$method</b></p>";
+echo '<h1>404 - Página no encontrada</h1>';
+echo '<p>Ruta: <b>' . htmlspecialchars($route) . "</b><br>Método: <b>$method</b></p>";
 exit;

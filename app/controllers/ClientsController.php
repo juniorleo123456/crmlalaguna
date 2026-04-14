@@ -1,7 +1,8 @@
 <?php
+
 // app/controllers/ClientsController.php
 
-class ClientsController extends Controller 
+class ClientsController extends Controller
 {
     private ClientModel $clientModel;
 
@@ -40,7 +41,7 @@ class ClientsController extends Controller
 
     private function form(string $mode, int $id = 0)
     {
-        $data = [];
+        $data  = [];
         $title = $mode === 'create' ? 'Nuevo Cliente' : 'Editar Cliente';
 
         if ($mode === 'edit') {
@@ -56,7 +57,7 @@ class ClientsController extends Controller
             $token = $_POST['csrf_token'] ?? '';
             if (!$this->validateCsrfToken($token)) {
                 $this->setFlash('danger', 'Error de validación de seguridad.');
-                $this->redirect("clients/{$mode}" . ($id ? "/$id" : ""));
+                $this->redirect("clients/{$mode}" . ($id ? "/$id" : ''));
             }
 
             // Recoger datos
@@ -77,8 +78,12 @@ class ClientsController extends Controller
 
             // Validaciones básicas
             $errors = [];
-            if (empty($data['name'])) $errors[] = 'El nombre es obligatorio';
-            if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'Email inválido';
+            if (empty($data['name'])) {
+                $errors[] = 'El nombre es obligatorio';
+            }
+            if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Email inválido';
+            }
             if ($mode === 'create' && (empty($data['password']) || strlen($data['password']) < 6)) {
                 $errors[] = 'Contraseña mínima 6 caracteres';
             }
@@ -91,6 +96,7 @@ class ClientsController extends Controller
                     'mode'  => $mode,
                     'id'    => $id
                 ]);
+
                 return;
             }
 
@@ -109,10 +115,10 @@ class ClientsController extends Controller
                 $userId = getDBConnection()->lastInsertId();
 
                 // Crear cliente
-                $clientStmt = getDBConnection()->prepare("
+                $clientStmt = getDBConnection()->prepare('
                     INSERT INTO clients (user_id, address, city, state, postal_code, company_name, tax_id, notes, phone)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ");
+                ');
                 $clientStmt->execute([
                     $userId,
                     $data['address'],
@@ -148,57 +154,57 @@ class ClientsController extends Controller
     }
 
     public function toggleStatus(int $id)
-{
-    $client = $this->clientModel->getById($id);
+    {
+        $client = $this->clientModel->getById($id);
 
-    if (!$client) {
-        $this->setFlash('danger', 'Cliente no encontrado.');
-        $this->redirect('clients');
-    }
-
-    $newStatus = $client['status'] === 'active' ? 'inactive' : 'active';
-
-    if ($this->clientModel->toggleStatus($id, $newStatus)) {
-        $message = "Cliente <strong>" . htmlspecialchars($client['name']) . "</strong> " . ($newStatus === 'active' ? 'activado' : 'desactivado') . " correctamente.";
-        
-        // Si desactivamos, cerrar TODAS las sesiones del usuario asociado
-        if ($newStatus === 'inactive') {
-            $sessionManager = new SessionManager(getDBConnection());
-            $sessionManager->destroyUserSessions($client['user_id']);
-            $message .= " Todas las sesiones del cliente han sido cerradas.";
+        if (!$client) {
+            $this->setFlash('danger', 'Cliente no encontrado.');
+            $this->redirect('clients');
         }
 
-        $this->setFlash('success', $message);
-    } else {
-        $this->setFlash('danger', "Error al cambiar estado del cliente <strong>" . htmlspecialchars($client['name']) . "</strong>.");
-    }
+        $newStatus = $client['status'] === 'active' ? 'inactive' : 'active';
 
-    $this->redirect('clients');
-}
-public function view(int $id)
-{
-    $client = $this->clientModel->getById($id);
-    if (!$client) {
-        $this->setFlash('danger', 'Cliente no encontrado.');
+        if ($this->clientModel->toggleStatus($id, $newStatus)) {
+            $message = 'Cliente <strong>' . htmlspecialchars($client['name']) . '</strong> ' . ($newStatus === 'active' ? 'activado' : 'desactivado') . ' correctamente.';
+
+            // Si desactivamos, cerrar TODAS las sesiones del usuario asociado
+            if ($newStatus === 'inactive') {
+                $sessionManager = new SessionManager(getDBConnection());
+                $sessionManager->destroyUserSessions($client['user_id']);
+                $message .= ' Todas las sesiones del cliente han sido cerradas.';
+            }
+
+            $this->setFlash('success', $message);
+        } else {
+            $this->setFlash('danger', 'Error al cambiar estado del cliente <strong>' . htmlspecialchars($client['name']) . '</strong>.');
+        }
+
         $this->redirect('clients');
     }
+    public function view(int $id)
+    {
+        $client = $this->clientModel->getById($id);
+        if (!$client) {
+            $this->setFlash('danger', 'Cliente no encontrado.');
+            $this->redirect('clients');
+        }
 
-    // Cargar servicios/proyectos asociados
-    $stmt = getDBConnection()->prepare("
+        // Cargar servicios/proyectos asociados
+        $stmt = getDBConnection()->prepare('
         SELECT cs.*, p.title AS project_title, s.name AS service_name
         FROM client_services cs
         LEFT JOIN projects p ON cs.project_id = p.id
         LEFT JOIN services s ON cs.service_id = s.id
         WHERE cs.client_id = ?
         ORDER BY cs.created_at DESC
-    ");
-    $stmt->execute([$id]);
-    $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ');
+        $stmt->execute([$id]);
+        $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $this->render('clients/view', [
-        'title'    => 'Ficha del Cliente: ' . $client['name'],
-        'client'   => $client,
-        'services' => $services
-    ]);
+        $this->render('clients/view', [
+            'title'    => 'Ficha del Cliente: ' . $client['name'],
+            'client'   => $client,
+            'services' => $services
+        ]);
+    }
 }
-} 

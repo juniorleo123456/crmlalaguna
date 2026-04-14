@@ -93,39 +93,43 @@
     <?php
     $allMenus = $this->getMenusForCurrentUser();
 
-    // 1. Recolectar TODOS los padres activos primero
-    $parents = [];
-    foreach ($allMenus as $menu) {
-        if ($menu['parent_id'] === null && ($menu['is_active'] ?? 1) == 1) {
-            $parents[$menu['id']] = $menu + ['children' => []];
-        }
-    }
-
-    // 2. Asignar TODOS los hijos a sus padres (segunda pasada completa)
-    foreach ($allMenus as $menu) {
-        if ($menu['parent_id'] !== null && ($menu['is_active'] ?? 1) == 1) {
-            $parentId = (int)$menu['parent_id'];
-            if (isset($parents[$parentId])) {
-                $parents[$parentId]['children'][] = $menu;
+            // 1. Recolectar TODOS los padres activos primero
+            $parents = [];
+            foreach ($allMenus as $menu) {
+                if ($menu['parent_id'] === null && ($menu['is_active'] ?? 1) == 1) {
+                    $parents[$menu['id']] = $menu + ['children' => []];
+                }
             }
-        }
-    }
 
-    // 3. Ordenar padres por 'order'
-    usort($parents, fn($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
+            // 2. Asignar TODOS los hijos a sus padres (segunda pasada completa)
+            foreach ($allMenus as $menu) {
+                if ($menu['parent_id'] !== null && ($menu['is_active'] ?? 1) == 1) {
+                    $parentId = (int)$menu['parent_id'];
+                    if (isset($parents[$parentId])) {
+                        $parents[$parentId]['children'][] = $menu;
+                    }
+                }
+            }
 
-    // 4. Renderizar
-    foreach ($parents as $parent):
-        $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $parentPath = '/' . trim($parent['url'] ?? '', '/');
-        $isActive = ($currentPath === $parentPath || strpos($currentPath, $parentPath . '/') === 0);
-        $hasChildren = !empty($parent['children']);
+            // 3. Ordenar padres por 'order'
+            usort($parents, fn ($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
 
-        // Verificar roles del padre (seguro)
-        $allowedRoles = json_decode($parent['roles'] ?? '[]', true);
-        if (!is_array($allowedRoles)) $allowedRoles = [];
-        if (!in_array($_SESSION['role'] ?? 'guest', $allowedRoles)) continue;
-    ?>
+            // 4. Renderizar
+            foreach ($parents as $parent):
+                $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+                $parentPath  = '/' . trim($parent['url'] ?? '', '/');
+                $isActive    = ($currentPath === $parentPath || strpos($currentPath, $parentPath . '/') === 0);
+                $hasChildren = !empty($parent['children']);
+
+                // Verificar roles del padre (seguro)
+                $allowedRoles = json_decode($parent['roles'] ?? '[]', true);
+                if (!is_array($allowedRoles)) {
+                    $allowedRoles = [];
+                }
+                if (!in_array($_SESSION['role'] ?? 'guest', $allowedRoles)) {
+                    continue;
+                }
+                ?>
         <a href="<?= BASE_URL . trim($parent['url'] ?? '#', '/') ?>" 
            class="list-group-item list-group-item-action py-3 <?= $isActive ? 'active' : '' ?> parent-menu"
            <?= $hasChildren ? 'data-bs-toggle="collapse" data-bs-target="#submenu-' . $parent['id'] . '" aria-expanded="' . ($isActive ? 'true' : 'false') . '" aria-controls="submenu-' . $parent['id'] . '"' : '' ?>>
@@ -141,17 +145,21 @@
         <?php if ($hasChildren): ?>
             <div class="collapse <?= $isActive ? 'show' : '' ?>" id="submenu-<?= $parent['id'] ?>">
                 <?php
-                // Ordenar hijos por 'order'
-                usort($parent['children'], fn($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
+                            // Ordenar hijos por 'order'
+                            usort($parent['children'], fn ($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
 
-                foreach ($parent['children'] as $child):
-                    $childPath = '/' . trim($child['url'] ?? '#', '/');
-                    $childActive = ($currentPath === $childPath || strpos($currentPath, $childPath . '/') === 0);
+            foreach ($parent['children'] as $child):
+                $childPath   = '/' . trim($child['url'] ?? '#', '/');
+                $childActive = ($currentPath === $childPath || strpos($currentPath, $childPath . '/') === 0);
 
-                    // Verificar roles del hijo
-                    $childRoles = json_decode($child['roles'] ?? '[]', true);
-                    if (!is_array($childRoles)) $childRoles = [];
-                    if (!in_array($_SESSION['role'] ?? 'guest', $childRoles)) continue;
+                // Verificar roles del hijo
+                $childRoles = json_decode($child['roles'] ?? '[]', true);
+                if (!is_array($childRoles)) {
+                    $childRoles = [];
+                }
+                if (!in_array($_SESSION['role'] ?? 'guest', $childRoles)) {
+                    continue;
+                }
                 ?>
                     <a href="<?= BASE_URL . trim($child['url'] ?? '#', '/') ?>" 
                        class="list-group-item list-group-item-action py-2 ps-5 <?= $childActive ? 'active' : '' ?>">

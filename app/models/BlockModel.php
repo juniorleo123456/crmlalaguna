@@ -1,4 +1,5 @@
 <?php
+
 // app/models/BlockModel.php
 
 class BlockModel
@@ -15,14 +16,15 @@ class BlockModel
      */
     public function getAll(): array
     {
-        $stmt = $this->pdo->query("
+        $stmt = $this->pdo->query('
             SELECT b.id, b.project_id, b.name, b.description, b.total_lots, 
                    b.min_monthly_payment, b.initial_payment, b.status,
                    p.title AS project_title
             FROM blocks b
             LEFT JOIN projects p ON b.project_id = p.id
             ORDER BY p.title, b.name
-        ");
+        ');
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -31,20 +33,22 @@ class BlockModel
      */
     public function getById(int $id): ?array
     {
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             SELECT b.*, p.title AS project_title
             FROM blocks b
             LEFT JOIN projects p ON b.project_id = p.id
             WHERE b.id = ?
-        ");
+        ');
         $stmt->execute([$id]);
+
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     public function projectExists(int $projectId): bool
     {
-        $stmt = $this->pdo->prepare("SELECT id FROM projects WHERE id = ?");
+        $stmt = $this->pdo->prepare('SELECT id FROM projects WHERE id = ?');
         $stmt->execute([$projectId]);
+
         return (bool) $stmt->fetch();
     }
 
@@ -66,11 +70,12 @@ class BlockModel
         $stmt->execute([
             $data['project_id'],
             $data['name'],
-            $data['description'] ?? null,
-            $data['total_lots'] ?? 0,
+            $data['description']         ?? null,
+            $data['total_lots']          ?? 0,
             $data['min_monthly_payment'] ?? 0,
-            $data['initial_payment'] ?? 0
+            $data['initial_payment']     ?? 0
         ]);
+
         return (int) $this->pdo->lastInsertId();
     }
 
@@ -84,7 +89,7 @@ class BlockModel
             throw new InvalidArgumentException("El proyecto con ID {$data['project_id']} no existe.");
         }
 
-        $stmt = $this->pdo->prepare("
+        $stmt = $this->pdo->prepare('
             UPDATE blocks SET
                 project_id = ?,
                 name = ?,
@@ -94,14 +99,15 @@ class BlockModel
                 initial_payment = ?,
                 updated_at = NOW()
             WHERE id = ?
-        ");
+        ');
+
         return $stmt->execute([
             $data['project_id'],
             $data['name'],
-            $data['description'] ?? null,
-            $data['total_lots'] ?? 0,
+            $data['description']         ?? null,
+            $data['total_lots']          ?? 0,
             $data['min_monthly_payment'] ?? 0,
-            $data['initial_payment'] ?? 0,
+            $data['initial_payment']     ?? 0,
             $id
         ]);
     }
@@ -111,8 +117,9 @@ class BlockModel
      */
     public function countRealLots(int $blockId): int
     {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM lots WHERE block_id = ?");
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM lots WHERE block_id = ?');
         $stmt->execute([$blockId]);
+
         return (int) $stmt->fetchColumn();
     }
 
@@ -130,6 +137,7 @@ class BlockModel
             ORDER BY name
         ");
         $stmt->execute([$projectId]);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -142,7 +150,8 @@ class BlockModel
             return false;
         }
 
-        $stmt = $this->pdo->prepare("UPDATE blocks SET status = ? WHERE id = ?");
-        return $stmt->execute([$newStatus, $id]); 
+        $stmt = $this->pdo->prepare('UPDATE blocks SET status = ? WHERE id = ?');
+
+        return $stmt->execute([$newStatus, $id]);
     }
 }

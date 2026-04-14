@@ -31,7 +31,7 @@
                                 'mora'       => 'danger',
                                 'cancelado'  => 'secondary',
                                 default      => 'muted'
-                                } ?>">
+                            } ?>">
                                 <?= ucfirst($data['lot_status']) ?>
                                     </strong>)
                         </small>

@@ -1,4 +1,5 @@
 <?php
+
 // app/controllers/BlocksController.php
 
 class BlocksController extends Controller
@@ -23,10 +24,10 @@ class BlocksController extends Controller
         $blocks = $this->blockModel->getAll();
 
         // Calcular conteo real de lotes para cada manzana
-         foreach ($blocks as &$block) {
-        $block['real_lots'] = $this->blockModel->countRealLots($block['id']);
-         }
-         unset($block); // buena práctica para evitar referencia accidental
+        foreach ($blocks as &$block) {
+            $block['real_lots'] = $this->blockModel->countRealLots($block['id']);
+        }
+        unset($block); // buena práctica para evitar referencia accidental
 
         $this->render('manzanas/index', [
             'title'  => 'Listado de Manzanas',
@@ -46,7 +47,7 @@ class BlocksController extends Controller
 
     private function form(string $mode, int $id = 0)
     {
-        $data = [];
+        $data  = [];
         $title = $mode === 'create' ? 'Nueva Manzana' : 'Editar Manzana';
 
         if ($mode === 'edit') {
@@ -66,26 +67,36 @@ class BlocksController extends Controller
             $token = $_POST['csrf_token'] ?? '';
             if (!$this->validateCsrfToken($token)) {
                 $this->setFlash('danger', 'Error de validación de seguridad.');
-                $this->redirect("blocks/{$mode}" . ($id ? "/$id" : ""));
+                $this->redirect("blocks/{$mode}" . ($id ? "/$id" : ''));
             }
 
             // Recoger datos del formulario
             $data = [
-                'project_id'           => (int) ($_POST['project_id'] ?? 0),
-                'name'                 => trim($_POST['name'] ?? ''),
-                'description'          => trim($_POST['description'] ?? ''),
-                'total_lots'           => (int) ($_POST['total_lots'] ?? 0),
-                'min_monthly_payment'  => (float) ($_POST['min_monthly_payment'] ?? 0),
-                'initial_payment'      => (float) ($_POST['initial_payment'] ?? 0)
+                'project_id'          => (int) ($_POST['project_id'] ?? 0),
+                'name'                => trim($_POST['name'] ?? ''),
+                'description'         => trim($_POST['description'] ?? ''),
+                'total_lots'          => (int) ($_POST['total_lots'] ?? 0),
+                'min_monthly_payment' => (float) ($_POST['min_monthly_payment'] ?? 0),
+                'initial_payment'     => (float) ($_POST['initial_payment'] ?? 0)
             ];
 
             // Validaciones básicas (lado servidor)
             $errors = [];
-            if ($data['project_id'] <= 0 || !$projectModel->projectExists($data['project_id'])) $errors[] = 'Debes seleccionar un proyecto válido';
-            if (empty($data['name'])) $errors[] = 'El nombre de la manzana es obligatorio';
-            if ($data['total_lots'] <= 0) $errors[] = 'El total de lotes debe ser mayor a 0';
-            if ($data['min_monthly_payment'] <= 0) $errors[] = 'El pago mensual mínimo debe ser mayor a 0';
-            if ($data['initial_payment'] < 0) $errors[] = 'La cuota inicial no puede ser negativa';
+            if ($data['project_id'] <= 0 || !$projectModel->projectExists($data['project_id'])) {
+                $errors[] = 'Debes seleccionar un proyecto válido';
+            }
+            if (empty($data['name'])) {
+                $errors[] = 'El nombre de la manzana es obligatorio';
+            }
+            if ($data['total_lots'] <= 0) {
+                $errors[] = 'El total de lotes debe ser mayor a 0';
+            }
+            if ($data['min_monthly_payment'] <= 0) {
+                $errors[] = 'El pago mensual mínimo debe ser mayor a 0';
+            }
+            if ($data['initial_payment'] < 0) {
+                $errors[] = 'La cuota inicial no puede ser negativa';
+            }
 
             if (!empty($errors)) {
                 $this->setFlash('danger', implode('<br>', $errors));
@@ -95,6 +106,7 @@ class BlocksController extends Controller
                     'mode'  => $mode,
                     'id'    => $id
                 ]);
+
                 return;
             }
 
@@ -117,10 +129,10 @@ class BlocksController extends Controller
 
         // GET: mostrar formulario
         $this->render('manzanas/form', [
-            'title' => $title,
-            'data'  => $data,
-            'mode'  => $mode,
-            'id'    => $id,
+            'title'        => $title,
+            'data'         => $data,
+            'mode'         => $mode,
+            'id'           => $id,
             'projectsList' => $projectsList
         ]);
     }
@@ -137,12 +149,11 @@ class BlocksController extends Controller
         $newStatus = $block['status'] === 'active' ? 'inactive' : 'active';
 
         if ($this->blockModel->toggleStatus($id, $newStatus)) {
-            $this->setFlash('success', "Manzana <strong>" . htmlspecialchars($block['name']) . "</strong> " . ($newStatus === 'active' ? 'activada' : 'desactivada') . " correctamente.");
+            $this->setFlash('success', 'Manzana <strong>' . htmlspecialchars($block['name']) . '</strong> ' . ($newStatus === 'active' ? 'activada' : 'desactivada') . ' correctamente.');
         } else {
-            $this->setFlash('danger', "Error al cambiar estado de la manzana <strong>" . htmlspecialchars($block['name']) . "</strong>.");
+            $this->setFlash('danger', 'Error al cambiar estado de la manzana <strong>' . htmlspecialchars($block['name']) . '</strong>.');
         }
 
         $this->redirect('blocks');
     }
 }
- 

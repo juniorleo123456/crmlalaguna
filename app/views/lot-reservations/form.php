@@ -15,7 +15,9 @@
                     <select name="lot_id" class="form-select" required>
                         <option value="">-- Seleccionar lote disponible --</option>
                         <?php foreach ($lots as $lot): ?>
-                            <?php if ($mode === 'create' && $lot['status'] !== 'disponible') continue; ?>
+                            <?php if ($mode === 'create' && $lot['status'] !== 'disponible') {
+                                continue;
+                            } ?>
                             <option value="<?= $lot['id'] ?>" <?= ($data['lot_id'] ?? 0) == $lot['id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($lot['lot_number']) ?> - <?= htmlspecialchars($lot['block_name']) ?>
                                 (Estado: <?= ucfirst($lot['status']) ?>)

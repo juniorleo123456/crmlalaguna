@@ -1,4 +1,5 @@
 <?php
+
 // app/controllers/ClientServicesController.php
 
 class ClientServicesController extends Controller
@@ -15,7 +16,7 @@ class ClientServicesController extends Controller
             $this->redirect('dashboard');
         }
 
-        $this->clientModel = new ClientModel(getDBConnection());
+        $this->clientModel  = new ClientModel(getDBConnection());
         $this->projectModel = new ProjectModel(getDBConnection());
     }
 
@@ -49,10 +50,10 @@ class ClientServicesController extends Controller
                 $this->setFlash('danger', 'Debes seleccionar un proyecto válido.');
             } else {
                 // Verificar que no exista ya la asociación
-                $check = getDBConnection()->prepare("
+                $check = getDBConnection()->prepare('
                     SELECT id FROM client_services 
                     WHERE client_id = ? AND project_id = ? AND service_id = 1
-                ");
+                ');
                 $check->execute([$clientId, $projectId]);
                 if ($check->fetch()) {
                     $this->setFlash('danger', 'Este proyecto ya está asociado a este cliente.');

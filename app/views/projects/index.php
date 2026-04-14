@@ -78,14 +78,14 @@
                                         'cancelado'     => 'bg-danger',
                                         default         => 'bg-light text-dark'
                                     };
-                                    $icon = match($project['status']) {
-                                        'planificacion' => 'bi bi-hourglass-split',
-                                        'ejecucion'     => 'bi bi-gear-wide-connected',
-                                        'entregado'     => 'bi bi-check-circle-fill',
-                                        'cancelado'     => 'bi bi-x-circle-fill',
-                                        default         => 'bi bi-question-circle'
-                                    };
-                                    ?>
+                            $icon = match($project['status']) {
+                                'planificacion' => 'bi bi-hourglass-split',
+                                'ejecucion'     => 'bi bi-gear-wide-connected',
+                                'entregado'     => 'bi bi-check-circle-fill',
+                                'cancelado'     => 'bi bi-x-circle-fill',
+                                default         => 'bi bi-question-circle'
+                            };
+                            ?>
                                     <span class="badge rounded-pill <?= $badgeClass ?>">
                                         <i class="<?= $icon ?> me-1"></i>
                                         <?= ucfirst($project['status']) ?>
@@ -134,14 +134,14 @@
     <?php if ($totalPages > 1): ?>
         <nav aria-label="Paginación de proyectos" class="mt-4">
             <ul class="pagination justify-content-center">
-                <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                <li class="page-item <?= $page                                                                                                                                         <= 1 ? 'disabled' : '' ?>">
                     <a class="page-link" href="?page=<?= max(1, $page - 1) ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($status) ?>&client_id=<?= $client_id ?>" <?= $page <= 1 ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Anterior</a>
                 </li>
 
-                <?php 
+                <?php
                 $startPage = max(1, $page - 2);
-                $endPage   = min($totalPages, $page + 2);
-                for ($p = $startPage; $p <= $endPage; $p++): ?>
+        $endPage           = min($totalPages, $page + 2);
+        for ($p = $startPage; $p <= $endPage; $p++): ?>
                     <li class="page-item <?= $p === $page ? 'active' : '' ?>">
                         <a class="page-link" href="?page=<?= $p ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($status) ?>&client_id=<?= $client_id ?>">
                             <?= $p ?>
@@ -149,7 +149,7 @@
                     </li>
                 <?php endfor; ?>
 
-                <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                <li class="page-item <?= $page                                                                                                                                                   >= $totalPages ? 'disabled' : '' ?>">
                     <a class="page-link" href="?page=<?= min($totalPages, $page + 1) ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($status) ?>&client_id=<?= $client_id ?>" <?= $page >= $totalPages ? 'tabindex="-1" aria-disabled="true"' : '' ?>>Siguiente</a>
                 </li>
             </ul>
