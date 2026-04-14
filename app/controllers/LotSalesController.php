@@ -45,8 +45,11 @@ class LotSalesController extends Controller
             $details                = $this->saleModel->getPaymentStatusDetails($sale['id']);
             $sale['payment_status'] = $details['status']; // actualiza en memoria
             $sale['late_fee_due']   = $details['late_fee_due'];
-            // Opcional: actualizar en BD si quieres persistirlo
-            // $this->saleModel->updateStatusFromCalculation($sale['id']);
+
+            // Persiste en BD (opcional pero recomendado)
+            if ($sale['payment_status'] !== $details['status']) {
+                $this->saleModel->updateStatusFromCalculation($sale['id']);
+            }
         }
 
         $this->render('lot-sales/index', [
