@@ -105,7 +105,11 @@ $routes = [
         'partners/create'              => ['controller' => 'PartnersController', 'action' => 'create'],
         'partners/edit/(\d+)'          => ['controller' => 'PartnersController', 'action' => 'edit'],
         'partners/toggle-status/(\d+)' => ['controller' => 'PartnersController', 'action' => 'toggleStatus'],
-     // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],  // lo agregamos después
+        'socios'                       => ['controller' => 'SociosController', 'action' => 'index'],
+        'socios/create'                => ['controller' => 'SociosController', 'action' => 'create'],
+        'socios/edit/(\d+)'            => ['controller' => 'SociosController', 'action' => 'edit'],
+        'socios/toggle-status/(\d+)'   => ['controller' => 'SociosController', 'action' => 'toggleStatus'],
+        // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],  // lo agregamos después
     ],
 
     'POST' => [
@@ -133,7 +137,9 @@ $routes = [
         'lot-payments/create'                 => ['controller' => 'LotPaymentsController', 'action' => 'create'],
         'partners/create'                     => ['controller' => 'PartnersController', 'action' => 'create'],
         'partners/edit/(\d+)'                 => ['controller' => 'PartnersController', 'action' => 'edit'],
-     // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],
+        'socios/create'                       => ['controller' => 'SociosController', 'action' => 'create'],
+        'socios/edit/(\d+)'                   => ['controller' => 'SociosController', 'action' => 'edit'],
+        // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],
 
         ]
 ];
