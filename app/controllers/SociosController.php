@@ -1,5 +1,4 @@
 <?php
-
 // app/controllers/SociosController.php
 
 class SociosController extends Controller
@@ -18,9 +17,6 @@ class SociosController extends Controller
         $this->socioModel = new SociosModel(getDBConnection());
     }
 
-    /**
-     * Listado de todos los socios
-     */
     public function index()
     {
         $socios = $this->socioModel->getAll();
@@ -31,9 +27,6 @@ class SociosController extends Controller
         ]);
     }
 
-    /**
-     * Formulario para crear/editar socio
-     */
     public function create()
     {
         $this->form('create');
@@ -57,19 +50,18 @@ class SociosController extends Controller
             }
         }
 
-        // Obtener usuarios con rol 'socio' que aún no tienen registro en socios
-        $availableUsers = $this->getAvailableUsersForSocio();
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = $_POST['csrf_token'] ?? '';
             if (!$this->validateCsrfToken($token)) {
                 $this->setFlash('danger', 'Error de seguridad.');
-                $this->redirect("socios/{$mode}" . ($id ? "/$id" : ''));
+                $this->redirect("socios/{$mode}" . ($id ? "/$id" : ""));
             }
 
             $data = [
-                'user_id'         => (int) ($_POST['user_id'] ?? 0),
-                'partner_id'      => (int) ($_POST['partner_id'] ?? null),
+                'name'            => trim($_POST['name'] ?? ''),
+                'email'           => trim($_POST['email'] ?? ''),
+                'password'        => trim($_POST['password'] ?? ''),
+                'phone'           => trim($_POST['phone'] ?? ''),
                 'nombre_empresa'  => trim($_POST['nombre_empresa'] ?? ''),
                 'direccion'       => trim($_POST['direccion'] ?? ''),
                 'ciudad'          => trim($_POST['ciudad'] ?? ''),
@@ -81,70 +73,80 @@ class SociosController extends Controller
             ];
 
             $errors = [];
-            if ($data['user_id'] <= 0) {
-                $errors[] = 'Selecciona un usuario válido';
+            if (empty($data['name'])) $errors[] = 'El nombre es obligatorio';
+            if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Email inválido';
+            }
+            if ($mode === 'create' && (empty($data['password']) || strlen($data['password']) < 6)) {
+                $errors[] = 'La contraseña debe tener mínimo 6 caracteres';
             }
 
             if (!empty($errors)) {
                 $this->setFlash('danger', implode('<br>', $errors));
                 $this->render('socios/form', [
-                    'title'          => $title,
-                    'data'           => $data,
-                    'mode'           => $mode,
-                    'id'             => $id,
-                    'availableUsers' => $availableUsers
+                    'title' => $title,
+                    'data'  => $data,
+                    'mode'  => $mode,
+                    'id'    => $id
                 ]);
-
                 return;
             }
 
             if ($mode === 'create') {
-                if ($this->socioModel->create($data)) {
-                    $this->setFlash('success', 'Socio registrado correctamente.');
-                    $this->redirect('socios');
-                } else {
-                    $this->setFlash('danger', 'Error al registrar el socio.');
-                }
+                // 1. Crear usuario con rol 'socio'
+                $userStmt = getDBConnection()->prepare("
+                    INSERT INTO users (name, email, password_hash, phone, role, status, created_at)
+                    VALUES (?, ?, ?, ?, 'socio', 'active', NOW())
+                ");
+                $userStmt->execute([
+                    $data['name'],
+                    $data['email'],
+                    password_hash($data['password'], PASSWORD_DEFAULT),
+                    $data['phone']
+                ]);
+                $userId = getDBConnection()->lastInsertId();
+
+                // 2. Crear registro en tabla socios
+                $socioStmt = getDBConnection()->prepare("
+                    INSERT INTO socios 
+                    (user_id, nombre_empresa, direccion, ciudad, telefono_extra, 
+                     banco, cuenta_bancaria, tipo_cuenta, notes, status, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW())
+                ");
+                $socioStmt->execute([
+                    $userId,
+                    $data['nombre_empresa'],
+                    $data['direccion'],
+                    $data['ciudad'],
+                    $data['telefono_extra'],
+                    $data['banco'],
+                    $data['cuenta_bancaria'],
+                    $data['tipo_cuenta'],
+                    $data['notes']
+                ]);
+
+                $this->setFlash('success', 'Socio creado correctamente.');
+                $this->redirect('socios');
             } else {
+                // Editar solo datos de socio (no cambiamos usuario ni contraseña)
                 if ($this->socioModel->update($id, $data)) {
                     $this->setFlash('success', 'Socio actualizado correctamente.');
                     $this->redirect('socios');
                 } else {
-                    $this->setFlash('danger', 'Error al actualizar el socio.');
+                    $this->setFlash('danger', 'Error al actualizar socio.');
                 }
             }
         }
 
+        // GET: mostrar formulario
         $this->render('socios/form', [
-            'title'          => $title,
-            'data'           => $data,
-            'mode'           => $mode,
-            'id'             => $id,
-            'availableUsers' => $availableUsers
+            'title' => $title,
+            'data'  => $data,
+            'mode'  => $mode,
+            'id'    => $id
         ]);
     }
 
-    /**
-     * Obtiene usuarios con rol 'socio' que aún no tienen registro en la tabla socios
-     */
-    private function getAvailableUsersForSocio(): array
-    {
-        $stmt = $this->pdo->prepare("
-            SELECT u.id, u.name, u.email 
-            FROM users u
-            LEFT JOIN socios s ON u.id = s.user_id
-            WHERE u.role = 'socio' 
-              AND s.id IS NULL
-            ORDER BY u.name ASC
-        ");
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Cambia el estado del socio (activo/inactivo)
-     */
     public function toggleStatus(int $id)
     {
         $socio = $this->socioModel->getById($id);
@@ -157,7 +159,7 @@ class SociosController extends Controller
 
         if ($this->socioModel->toggleStatus($id, $newStatus)) {
             $mensaje = $newStatus === 'active' ? 'activado' : 'desactivado';
-            $this->setFlash('success', "Socio {$mensaje} correctamente.");
+            $this->setFlash('success', "Socio <strong>" . htmlspecialchars($socio['name']) . "</strong> {$mensaje} correctamente.");
         } else {
             $this->setFlash('danger', 'Error al cambiar estado del socio.');
         }
