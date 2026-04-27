@@ -67,9 +67,14 @@ class PartnerPaymentsController extends Controller
                 $this->redirect("partners/comisiones/{$mode}" . ($id ? "/$id" : ""));
             }
 
+            $periodo = $_POST['periodo'] ?? '';
+            if (!empty($periodo)) {
+                $periodo = date('Y-m-01', strtotime($periodo . '-01')); // Normalizar a primer día del mes
+            }
+
             $data = [
                 'socio_id'           => (int)($_POST['socio_id'] ?? 0),
-                'periodo'            => $_POST['periodo'] ?? date('Y-m-01'),
+                'periodo'            => $periodo,
                 'total_ingresos_mes' => (float)($_POST['total_ingresos_mes'] ?? 0),
                 'monto_pago'         => (float)($_POST['monto_pago'] ?? 0),
                 'tipo_comision'      => $_POST['tipo_comision'] ?? 'percent',
@@ -114,5 +119,22 @@ class PartnerPaymentsController extends Controller
             'mode'   => $mode,
             'id'     => $id
         ]);
+    }
+        /**
+     * Eliminar un pago mensual (con confirmación)
+     */
+    public function delete(int $id)
+    {
+        // Solo admin puede eliminar
+        if ($_SESSION['role'] !== 'admin') {
+            $this->setFlash('danger', 'Acceso denegado.');
+            $this->redirect('partners/comisiones');
+        }
+        // Por simplicidad, eliminamos directamente
+        $stmt = getDBConnection()->prepare("DELETE FROM partner_payments WHERE id = ?");
+        $stmt->execute([$id]);
+
+        $this->setFlash('success', 'Pago mensual eliminado correctamente.');
+        $this->redirect('partners/comisiones');
     }
 }

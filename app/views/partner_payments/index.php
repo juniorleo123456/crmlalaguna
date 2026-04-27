@@ -36,7 +36,8 @@
                     <tbody>
                         <?php foreach ($payments as $p): ?>
                             <tr>
-                                <td><?= date('m/Y', strtotime($p['periodo'])) ?></td>
+                                <!-- Corrección de fecha -->
+                                <td><?= !empty($p['periodo']) ? date('m/Y', strtotime($p['periodo'])) : '—' ?></td>
                                 <td><?= htmlspecialchars($p['socio_name']) ?></td>
                                 <td><?= htmlspecialchars($p['nombre_empresa'] ?? '-') ?></td>
                                 <td><strong>S/ <?= number_format($p['total_ingresos_mes'], 2) ?></strong></td>
@@ -50,17 +51,15 @@
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm">
                                         <a href="<?= BASE_URL ?>partners/comisiones/edit/<?= $p['id'] ?>" 
-                                           class="btn btn-outline-primary" title="Editar pago">
+                                           class="btn btn-outline-primary" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <!-- 
                                         <a href="<?= BASE_URL ?>partners/comisiones/delete/<?= $p['id'] ?>" 
-                                           class="btn btn-outline-danger" 
-                                           onclick="return confirm('¿Estás seguro de eliminar este pago?');"
+                                           class="btn btn-outline-danger"
+                                           onclick="return confirm('¿Estás seguro de eliminar este pago mensual?\nEsta acción no se puede deshacer.');"
                                            title="Eliminar">
                                             <i class="bi bi-trash"></i>
                                         </a>
-                                        -->
                                     </div>
                                 </td>
                             </tr>

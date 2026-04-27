@@ -104,6 +104,7 @@ $routes = [
         'partners/comisiones'          => ['controller' => 'PartnerPaymentsController', 'action' => 'index'],
         'partners/comisiones/create'   => ['controller' => 'PartnerPaymentsController', 'action' => 'create'],
         'partners/comisiones/edit/(\d+)' => ['controller' => 'PartnerPaymentsController', 'action' => 'edit'],
+        'partners/comisiones/delete/(\d+)'    => ['controller' => 'PartnerPaymentsController', 'action' => 'delete'],
         'socios'                       => ['controller' => 'SociosController', 'action' => 'index'],
         'socios/create'                => ['controller' => 'SociosController', 'action' => 'create'],
         'socios/edit/(\d+)'            => ['controller' => 'SociosController', 'action' => 'edit'],
