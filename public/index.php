@@ -109,6 +109,9 @@ $routes = [
         'socios/create'                => ['controller' => 'SociosController', 'action' => 'create'],
         'socios/edit/(\d+)'            => ['controller' => 'SociosController', 'action' => 'edit'],
         'socios/toggle-status/(\d+)'   => ['controller' => 'SociosController', 'action' => 'toggleStatus'],
+        'contracts'                    => ['controller' => 'ContractsController', 'action' => 'index'],
+        'contracts/create'             => ['controller' => 'ContractsController', 'action' => 'create'],
+        'contracts/view/(\d+)'         => ['controller' => 'ContractsController', 'action' => 'view'],   // opcional para ver detalles
         // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],  // lo agregamos después
     ],
 
@@ -139,6 +142,7 @@ $routes = [
         'partners/comisiones/edit/(\d+)'      => ['controller' => 'PartnerPaymentsController', 'action' => 'edit'],
         'socios/create'                       => ['controller' => 'SociosController', 'action' => 'create'],
         'socios/edit/(\d+)'                   => ['controller' => 'SociosController', 'action' => 'edit'],
+        'contracts/create'             => ['controller' => 'ContractsController', 'action' => 'create'],
         // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],
 
         ]
