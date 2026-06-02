@@ -28,7 +28,7 @@
     <?php endforeach; ?>
 </div>
 
-<!-- Sección de actividad reciente (placeholder) -->
+<!-- Sección de actividad reciente (datos reales) -->
 <div class="row">
     <div class="col-lg-8">
         <div class="card mb-4">
@@ -36,9 +36,22 @@
                 <h5 class="mb-0">Últimas actualizaciones</h5>
             </div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">Actualización: avance del proyecto "Residencial Azul" - 12% (por María)</li>
-                <li class="list-group-item">Pago registrado: Cliente 'González' $4,500</li>
-                <li class="list-group-item">Contrato subido: Proyecto 'Vista Mar'</li>
+                <?php if (!empty($recentActivity)): ?>
+                    <?php foreach ($recentActivity as $activity): ?>
+                        <li class="list-group-item">
+                            <strong><?= htmlspecialchars($activity['type']) ?>:</strong>
+                            <?= htmlspecialchars($activity['text']) ?>
+                            <span class="text-muted float-end">
+                                <?= htmlspecialchars($activity['date']) ?>
+                                <?php if (!empty($activity['amount'])): ?>
+                                    — <?= htmlspecialchars($activity['amount']) ?>
+                                <?php endif; ?>
+                            </span>
+                        </li>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <li class="list-group-item text-muted">No hay actividad registrada.</li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>
@@ -46,11 +59,20 @@
     <div class="col-lg-4">
         <div class="card mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-0">Próximos vencimientos</h5>
+                <h5 class="mb-0">Próximos vencimientos (30 días)</h5>
             </div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">Cliente: Pérez — $1,200 — 15/03/2026</li>
-                <li class="list-group-item">Cliente: Ruiz — $900 — 20/03/2026</li>
+                <?php if (!empty($upcomingPayments)): ?>
+                    <?php foreach ($upcomingPayments as $payment): ?>
+                        <li class="list-group-item">
+                            <strong><?= htmlspecialchars($payment['client']) ?></strong> —
+                            <?= htmlspecialchars($payment['amount']) ?> —
+                            <span class="text-muted"><?= htmlspecialchars($payment['date']) ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <li class="list-group-item text-muted">No hay pagos próximos registrados.</li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>
@@ -59,7 +81,7 @@
     <div class="col-12">
         <div class="card shadow-sm">
             <div class="card-header bg-info text-white">
-                <h5 class="mb-0">Estado de proyectos</h5>
+                <h5 class="mb-0">Estado de lotes</h5>
             </div>
             <div class="card-body">
                 <canvas id="projectsChart" height="120"></canvas>
@@ -71,22 +93,30 @@
 <script>
     const ctx = document.getElementById('projectsChart').getContext('2d');
     new Chart(ctx, {
-        type: 'bar',
+        type: 'doughnut',
         data: {
-            labels: ['Planificación', 'Ejecución', 'Entregado', 'Cancelado'],
+            labels: ['Disponibles', 'Vendidos', 'Reservados', 'En Mora', 'Cancelados'],
             datasets: [{
-                label: 'Proyectos',
-                data: [0, <?= $activeProjects ?>, 0, 0], // más adelante datos reales por estado
-                backgroundColor: ['#6c757d', '#0d6efd', '#198754', '#dc3545'],
-                borderColor: ['#5c636a', '#0b5ed7', '#157347', '#bb2d3b'],
-                borderWidth: 1
+                label: 'Lotes',
+                data: [
+                    <?= $lotStatusStats['disponible'] ?? 0 ?>,
+                    <?= $lotStatusStats['vendido'] ?? 0 ?>,
+                    <?= $lotStatusStats['reservado'] ?? 0 ?>,
+                    <?= $lotStatusStats['mora'] ?? 0 ?>,
+                    <?= $lotStatusStats['cancelado'] ?? 0 ?>
+                ],
+                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6c757d'],
+                borderColor: ['#0b5ed7', '#157347', '#ffb81c', '#bb2d3b', '#5c636a'],
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
             }
         }
     });
