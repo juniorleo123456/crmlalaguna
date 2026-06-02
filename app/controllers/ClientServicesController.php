@@ -35,8 +35,8 @@ class ClientServicesController extends Controller
             $this->redirect('clients');
         }
 
-        $projects = $this->projectModel->getAll(); // o crea getActiveProjects() si quieres filtrar
-
+        $projects = $this->projectModel->getAll();
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = $_POST['csrf_token'] ?? '';
             if (!$this->validateCsrfToken($token)) {
