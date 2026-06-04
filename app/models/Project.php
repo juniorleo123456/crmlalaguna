@@ -90,7 +90,7 @@ class Project
 
     public function countActive(): int
     {
-        $stmt = $this->pdo->query("SELECT COUNT(*) FROM projects WHERE status = 'ejecucion'");
+        $stmt = $this->pdo->query("SELECT COUNT(*) FROM projects WHERE status IN ('planificacion', 'ejecucion')");
 
         return (int) $stmt->fetchColumn();
     }
