@@ -111,7 +111,11 @@ $routes = [
         'socios/toggle-status/(\d+)'   => ['controller' => 'SociosController', 'action' => 'toggleStatus'],
         'contracts'                    => ['controller' => 'ContractsController', 'action' => 'index'],
         'contracts/create'             => ['controller' => 'ContractsController', 'action' => 'create'],
-        'contracts/view/(\d+)'         => ['controller' => 'ContractsController', 'action' => 'view'],   // opcional para ver detalles
+        'contracts/view/(\d+)'         => ['controller' => 'ContractsController', 'action' => 'view'],
+        'reports'                      => ['controller' => 'ReportsController', 'action' => 'index'],
+        'reports/sales'                => ['controller' => 'ReportsController', 'action' => 'sales'],
+        'reports/payments'             => ['controller' => 'ReportsController', 'action' => 'payments'],
+        'reports/lots'                 => ['controller' => 'ReportsController', 'action' => 'lots'],
         // 'lot-reservations/edit/(\d+)' => ['controller' => 'LotReservationsController', 'action' => 'edit'],  // lo agregamos después
     ],
 
